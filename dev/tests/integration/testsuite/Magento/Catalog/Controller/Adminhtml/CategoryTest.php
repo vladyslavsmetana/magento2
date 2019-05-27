@@ -555,4 +555,15 @@ class CategoryTest extends \Magento\TestFramework\TestCase\AbstractBackendContro
             $this->productResource->getConnection()->fetchAll($oldCategoryProducts)
         );
     }
+
+    /**
+     * Test Admin Category Request
+     */
+    public function testAdminCategoryRequest()
+    {
+        $this->dispatch('catalog/Adminhtml_category/');
+        $response = $this->getResponse();
+        $this->assertContains('no-route', $response->getBody());
+        $this->assertEquals('404', $response->getStatusCode());
+    }
 }
