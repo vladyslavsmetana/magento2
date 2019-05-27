@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\Sales\Helper;
 
+use Magento\Framework\App\ObjectManager;
+
 /**
  * Sales admin helper.
  */
@@ -33,23 +35,32 @@ class Admin extends \Magento\Framework\App\Helper\AbstractHelper
     protected $escaper;
 
     /**
+     * @var \DOMDocumentFactory
+     */
+    private $domDocumentFactory;
+
+    /**
      * @param \Magento\Framework\App\Helper\Context $context
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Magento\Sales\Model\Config $salesConfig
      * @param \Magento\Framework\Pricing\PriceCurrencyInterface $priceCurrency
      * @param \Magento\Framework\Escaper $escaper
+     * @param \DOMDocumentFactory $domDocumentFactory
      */
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Sales\Model\Config $salesConfig,
         \Magento\Framework\Pricing\PriceCurrencyInterface $priceCurrency,
-        \Magento\Framework\Escaper $escaper
+        \Magento\Framework\Escaper $escaper,
+        \DOMDocumentFactory $domDocumentFactory = null
     ) {
         $this->priceCurrency = $priceCurrency;
         $this->_storeManager = $storeManager;
         $this->_salesConfig = $salesConfig;
         $this->escaper = $escaper;
+        $this->domDocumentFactory = $domDocumentFactory
+            ?? ObjectManager::getInstance()->get(\DOMDocumentFactory::class);
         parent::__construct($context);
     }
 
@@ -150,31 +161,31 @@ class Admin extends \Magento\Framework\App\Helper\AbstractHelper
     public function escapeHtmlWithLinks($data, $allowedTags = null)
     {
         if (!empty($data) && is_array($allowedTags) && in_array('a', $allowedTags)) {
-            $links = [];
-            $i = 1;
-            $data = str_replace('%', '%%', $data);
-            $regexp = "#(?J)<a"
-                ."(?:(?:\s+(?:(?:href\s*=\s*(['\"])(?<link>.*?)\\1\s*)|(?:\S+\s*=\s*(['\"])(.*?)\\3)\s*)*)|>)"
-                .">?(?:(?:(?<text>.*?)(?:<\/a\s*>?|(?=<\w))|(?<text>.*)))#si";
-            while (preg_match($regexp, $data, $matches)) {
-                $text = '';
-                if (!empty($matches['text'])) {
-                    $text = str_replace('%%', '%', $matches['text']);
+            $domDocument = $this->domDocumentFactory->create();
+            libxml_use_internal_errors(true);
+            @$domDocument->loadHTML($data, LIBXML_HTML_NODEFDTD);
+
+            foreach ($domDocument->getElementsByTagName('a') as $tag) {
+                $attributeNames = [];
+                foreach ($tag->attributes as $attribute) {
+                    if ($attribute->name != 'href') {
+                        $attributeNames[] = $attribute->name;
+                    }
                 }
-                $url = $this->filterUrl($matches['link'] ?? '');
-                //Recreate a minimalistic secure a tag
-                $links[] = sprintf(
-                    '<a href="%s">%s</a>',
-                    htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false),
-                    $this->escaper->escapeHtml($text)
-                );
-                $data = str_replace($matches[0], '%' . $i . '$s', $data);
-                ++$i;
+                foreach ($attributeNames as $name) {
+                    $tag->removeAttribute($name);
+                }
+                $hrefValue = $tag->getAttribute('href');
+                $hrefValue = $this->filterUrl($hrefValue);
+
+                $tag->setAttribute('href', $this->escaper->escapeUrl($hrefValue));
+                $tag->nodeValue = $this->escaper->escapeHtml($tag->nodeValue);
             }
-            $data = $this->escaper->escapeHtml($data, $allowedTags);
-            return vsprintf($data, $links);
+            $data = $domDocument->saveHTML();
+            preg_match('/<body>(.+)<\/body><\/html>$/si', $data, $matches);
+            $data = !empty($matches) ? $matches[1] : '';
         }
-        return $this->escaper->escapeHtml($data, $allowedTags);
+        return $this->escaper->escapeHtml(mb_convert_encoding($data, 'UTF-8', 'HTML-ENTITIES'), $allowedTags);
     }
  
     /**
