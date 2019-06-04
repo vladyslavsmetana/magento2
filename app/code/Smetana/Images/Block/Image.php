@@ -16,24 +16,24 @@ class Image extends \Magento\Framework\View\Element\Template
     public $scopeConfig;
 
     /**
-     * Image Helper
+     * Image Resize Model
      *
-     * @var \Smetana\Images\Helper\Data
+     * @var \Smetana\Images\Model\Frontend\Resize
      */
-    public $helper;
+    public $resize;
 
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Smetana\Images\Helper\Data $helper
+     * @param \Smetana\Images\Model\Frontend\Resize $resize
      * @param \Magento\Framework\View\Element\Template\Context $context
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        \Smetana\Images\Helper\Data $helper,
+        \Smetana\Images\Model\Frontend\Resize $resize,
         \Magento\Framework\View\Element\Template\Context $context
     ) {
-        $this->helper = $helper;
         $this->scopeConfig = $scopeConfig;
+        $this->resize = $resize;
         parent::__construct($context);
     }
 
@@ -64,7 +64,7 @@ class Image extends \Magento\Framework\View\Element\Template
         if ($image === null || $image == '') {
             return false;
         }
-        $path = $this->helper->resize(
+        $path = $this->resize->resize(
             $image,
             (int) $this->getConfig('image_width'),
             (int) $this->getConfig('image_height')

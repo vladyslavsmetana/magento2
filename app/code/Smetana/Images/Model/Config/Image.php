@@ -55,7 +55,12 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
     {
         if (!empty($this->getFileData())) {
             $operations = ObjectManager::getInstance()->create(\Magento\Framework\Filesystem\Driver\File::CLASS);
-
+            if (!$operations->isReadable($this->_getUploadDir())) {
+                $folders = ['default', 'resize'];
+                foreach ($folders as $folder) {
+                    $operations->createDirectory($this->_mediaDirectory->getAbsolutePath() . 'products_image/' . $folder);
+                }
+            }
             $files = $operations->readDirectory($this->_getUploadDir());
             if ($files) {
                 foreach ($files as $file) {
