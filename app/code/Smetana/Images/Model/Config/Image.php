@@ -20,13 +20,6 @@ use Magento\MediaStorage\Model\File\UploaderFactory;
 class Image extends \Magento\Config\Model\Config\Backend\Image
 {
     /**
-     * The tail part of directory path for uploading
-     *
-     * @var string
-     */
-    const UPLOAD_DIR = 'products_image';
-
-    /**
      * File Operations
      *
      * @var File
@@ -73,27 +66,6 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
             $resourceCollection,
             $data
         );
-    }
-
-    /**
-     * Returning path to directory for upload file
-     *
-     * @return string
-     * @throw \Magento\Framework\Exception\LocalizedException
-     */
-    protected function _getUploadDir(): string
-    {
-        return $this->_mediaDirectory->getAbsolutePath($this->_appendScopeInfo(self::UPLOAD_DIR));
-    }
-
-    /**
-     * Making a decision about whether to add info about the scope
-     *
-     * @return boolean
-     */
-    protected function _addWhetherScopeInfo(): bool
-    {
-        return true;
     }
 
     /**
