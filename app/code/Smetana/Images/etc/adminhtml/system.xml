@@ -16,7 +16,7 @@
                     <label>Select Image</label>
                     <backend_model>Smetana\Images\Model\Config\Image</backend_model>
                     <base_url type="media" scope_info="1">products_image</base_url>
-                    <upload_dir>pub/media/products_image</upload_dir>
+                    <upload_dir>pub/media/products_image/original</upload_dir>
                 </field>
                 <field id="image_width" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Image Width</label>

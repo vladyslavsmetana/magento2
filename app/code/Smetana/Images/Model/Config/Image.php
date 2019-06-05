@@ -76,19 +76,27 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
     public function beforeSave()
     {
         if (!empty($this->getFileData())) {
-            if (!$this->file->isReadable($this->_getUploadDir())) {
-                $folders = ['default', 'resize'];
-                foreach ($folders as $folder) {
-                    $this->file->createDirectory($this->_mediaDirectory->getAbsolutePath() . 'products_image/' . $folder);
+            $mimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+            $correctMime = null;
+            foreach ($mimeTypes as $type) {
+                if (mime_content_type($this->getFileData()['tmp_name']) != $type) {
+                    continue;
                 }
+                $correctMime = true;
+                break;
+            }
+            if ($correctMime === null) {
+                throw new LocalizedException(__('%1', 'The file has the wrong extension'));
+            }
+
+            if (!$this->file->isReadable($this->_getUploadDir())) {
+                $this->file->createDirectory($this->_mediaDirectory->getAbsolutePath() . 'products_image/original');
             }
             $files = $this->file->readDirectory($this->_getUploadDir());
             if ($files) {
                 foreach ($files as $file) {
                     $this->file->deleteFile($file);
-                }
-                if (mime_content_type($this->getFileData()['tmp_name']) != 'image/jpeg') {
-                    throw new LocalizedException(__('%1', 'The file has the wrong extension'));
                 }
             }
         }
