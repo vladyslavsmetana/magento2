@@ -1,7 +1,18 @@
 <?php
 namespace Smetana\Images\Model\Config;
 
+use Magento\Config\Model\Config\Backend\File\RequestData\RequestDataInterface;
+use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Data\Collection\AbstractDb;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Filesystem;
+use Magento\Framework\Filesystem\Driver\File;
+use Magento\Framework\Model\Context;
+use Magento\Framework\Model\ResourceModel\AbstractResource;
+use Magento\Framework\Registry;
+use Magento\MediaStorage\Model\File\UploaderFactory;
 
 /**
  * Image Operations
@@ -18,38 +29,38 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
     /**
      * File Operations
      *
-     * @var \Magento\Framework\Filesystem\Driver\File
+     * @var File
      */
     private $file;
 
     /**
-     * @param \Magento\Framework\Model\Context $context
-     * @param \Magento\Framework\Registry $registry
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
-     * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
-     * @param \Magento\MediaStorage\Model\File\UploaderFactory $uploaderFactory
-     * @param \Magento\Config\Model\Config\Backend\File\RequestData\RequestDataInterface $requestData
-     * @param \Magento\Framework\Filesystem $filesystem
-     * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
-     * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
+     * @param Context $context
+     * @param Registry $registry
+     * @param ScopeConfigInterface $config
+     * @param TypeListInterface $cacheTypeList
+     * @param UploaderFactory $uploaderFactory
+     * @param RequestDataInterface $requestData
+     * @param Filesystem $filesystem
+     * @param AbstractResource $resource
+     * @param AbstractDb $resourceCollection
      * @param array $data
-     * @param \Magento\Framework\Filesystem\Driver\File $file
+     * @param File $file
      */
     public function __construct(
-        \Magento\Framework\Model\Context $context,
-        \Magento\Framework\Registry $registry,
-        \Magento\Framework\App\Config\ScopeConfigInterface $config,
-        \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
-        \Magento\MediaStorage\Model\File\UploaderFactory $uploaderFactory,
-        \Magento\Config\Model\Config\Backend\File\RequestData\RequestDataInterface $requestData,
-        \Magento\Framework\Filesystem $filesystem,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        Context $context,
+        Registry $registry,
+        ScopeConfigInterface $config,
+        TypeListInterface $cacheTypeList,
+        UploaderFactory $uploaderFactory,
+        RequestDataInterface $requestData,
+        Filesystem $filesystem,
+        AbstractResource $resource = null,
+        AbstractDb $resourceCollection = null,
         array $data = [],
-        \Magento\Framework\Filesystem\Driver\File $file = null
+        File $file = null
     ) {
         $this->file = $file
-            ?? ObjectManager::getInstance()->get(\Magento\Framework\Filesystem\Driver\File::class);
+            ?? ObjectManager::getInstance()->get(File::class);
         parent::__construct(
             $context,
             $registry,
@@ -88,7 +99,7 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
     /**
      * Changing process of saving image
      *
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function beforeSave()
     {
@@ -105,7 +116,7 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
                     $this->file->deleteFile($file);
                 }
                 if (mime_content_type($this->getFileData()['tmp_name']) != 'image/jpeg') {
-                    throw new \Magento\Framework\Exception\LocalizedException(__('%1', 'The file has the wrong extension'));
+                    throw new LocalizedException(__('%1', 'The file has the wrong extension'));
                 }
             }
         }

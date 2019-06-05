@@ -2,6 +2,8 @@
 namespace Smetana\Images\Block;
 
 use \Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\View\Element\Template\Context;
+use Smetana\Images\Model\Frontend\Resize;
 
 /**
  * Returning complete image
@@ -11,26 +13,26 @@ class Image extends \Magento\Framework\View\Element\Template
     /**
      * Scope Config Interface
      *
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var ScopeConfigInterface
      */
-    public $scopeConfig;
+    private $scopeConfig;
 
     /**
      * Image Resize Model
      *
-     * @var \Smetana\Images\Model\Frontend\Resize
+     * @var Resize
      */
-    public $resize;
+    private $resize;
 
     /**
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Smetana\Images\Model\Frontend\Resize $resize
-     * @param \Magento\Framework\View\Element\Template\Context $context
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Resize $resize
+     * @param Context $context
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        \Smetana\Images\Model\Frontend\Resize $resize,
-        \Magento\Framework\View\Element\Template\Context $context
+        Resize $resize,
+        Context $context
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->resize = $resize;
@@ -56,19 +58,21 @@ class Image extends \Magento\Framework\View\Element\Template
     /**
      * Getting image path
      *
-     * @return string or boolean
+     * @return string
      */
-    public function getImage()
+    public function getImage(): string
     {
         $image = $this->getConfig('smetana_upload_image');
-        if ($image === null || $image == '') {
-            return false;
+        if ($image == '') {
+            return '';
         }
         $path = $this->resize->resize(
             $image,
             (int) $this->getConfig('image_width'),
             (int) $this->getConfig('image_height')
         );
-        return $path == false ? '' : substr($path, strpos($path, 'pub'));
+
+        return $path == '' ? $path : $this->_urlBuilder
+                ->getBaseUrl(['_type' => \Magento\Framework\UrlInterface::URL_TYPE_MEDIA]) . $path;
     }
 }
