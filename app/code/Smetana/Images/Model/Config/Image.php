@@ -68,7 +68,6 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
         );
     }
 
-
     /**
      * Changing process of saving image
      *
