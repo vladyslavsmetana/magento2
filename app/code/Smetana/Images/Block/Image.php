@@ -2,38 +2,43 @@
 namespace Smetana\Images\Block;
 
 use \Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\UrlInterface;
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\View\Element\Template\Context;
+use Magento\Store\Model\ScopeInterface;
+use Smetana\Images\Model\Frontend\Resize;
 
 /**
- * Returning complete image
+ * Block to display image on frontend product page
  */
-class Image extends \Magento\Framework\View\Element\Template
+class Image extends Template
 {
     /**
      * Scope Config Interface
      *
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var ScopeConfigInterface
      */
-    public $scopeConfig;
+    private $scopeConfig;
 
     /**
-     * Image Helper
+     * Image Resize Model
      *
-     * @var \Smetana\Images\Helper\Data
+     * @var Resize
      */
-    public $helper;
+    private $resize;
 
     /**
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Smetana\Images\Helper\Data $helper
-     * @param \Magento\Framework\View\Element\Template\Context $context
+     * @param ScopeConfigInterface $scopeConfig
+     * @param Resize $resize
+     * @param Context $context
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
-        \Smetana\Images\Helper\Data $helper,
-        \Magento\Framework\View\Element\Template\Context $context
+        Resize $resize,
+        Context $context
     ) {
-        $this->helper = $helper;
         $this->scopeConfig = $scopeConfig;
+        $this->resize = $resize;
         parent::__construct($context);
     }
 
@@ -44,11 +49,11 @@ class Image extends \Magento\Framework\View\Element\Template
      *
      * @return string
      */
-    public function getConfig(string $option): string
+    private function getConfig(string $option): string
     {
         $value = $this->scopeConfig->getValue(
             "smetana_section/smetana_group/$option",
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         );
         return $value === null ? '' : $value;
     }
@@ -56,19 +61,23 @@ class Image extends \Magento\Framework\View\Element\Template
     /**
      * Getting image path
      *
-     * @return string or boolean
+     * @throws \Magento\Framework\Exception\FileSystemException
+     *
+     * @return string
      */
-    public function getImage()
+    public function getImage(): string
     {
         $image = $this->getConfig('smetana_upload_image');
-        if ($image === null || $image == '') {
-            return false;
+        if ($image == '') {
+            return '';
         }
-        $path = $this->helper->resize(
+        $path = $this->resize->resize(
             $image,
             (int) $this->getConfig('image_width'),
             (int) $this->getConfig('image_height')
         );
-        return $path == false ? '' : substr($path, strpos($path, 'pub'));
+
+        return $path == '' ? $path : $this->_urlBuilder
+                ->getBaseUrl(['_type' => UrlInterface::URL_TYPE_MEDIA]) . $path;
     }
 }
