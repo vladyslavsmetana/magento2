@@ -52,7 +52,7 @@ class Resize extends AbstractHelper
     }
 
     /**
-     * Resizing Smetana Image
+     * Resizing Smetana Images
      *
      * @param string $image
      * @param int $width
