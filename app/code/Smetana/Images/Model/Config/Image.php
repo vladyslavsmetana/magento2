@@ -93,6 +93,14 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
             if (!$this->file->isReadable($this->_getUploadDir())) {
                 $this->file->createDirectory($this->_mediaDirectory->getAbsolutePath() . 'products_image/original');
             }
+        }
+
+        if (!empty($this->getFileData())
+            || array_key_exists(
+                'delete',
+                $this->_data["groups"]["smetana_group"]["fields"]["smetana_upload_image"]["value"]
+            )
+        ) {
             $files = $this->file->readDirectory($this->_getUploadDir());
             if ($files) {
                 foreach ($files as $file) {
