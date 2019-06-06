@@ -2,7 +2,9 @@
 namespace Smetana\Images\Block;
 
 use \Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template\Context;
+use Magento\Store\Model\ScopeInterface;
 use Smetana\Images\Model\Frontend\Resize;
 
 /**
@@ -46,17 +48,19 @@ class Image extends \Magento\Framework\View\Element\Template
      *
      * @return string
      */
-    public function getConfig(string $option): string
+    private function getConfig(string $option): string
     {
         $value = $this->scopeConfig->getValue(
             "smetana_section/smetana_group/$option",
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         );
         return $value === null ? '' : $value;
     }
 
     /**
      * Getting image path
+     *
+     * @throws \Magento\Framework\Exception\FileSystemException
      *
      * @return string
      */
@@ -73,6 +77,6 @@ class Image extends \Magento\Framework\View\Element\Template
         );
 
         return $path == '' ? $path : $this->_urlBuilder
-                ->getBaseUrl(['_type' => \Magento\Framework\UrlInterface::URL_TYPE_MEDIA]) . $path;
+                ->getBaseUrl(['_type' => UrlInterface::URL_TYPE_MEDIA]) . $path;
     }
 }
