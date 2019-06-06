@@ -24,7 +24,7 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
      *
      * @var File
      */
-    private $file;
+    private $fileDriver;
 
     /**
      * @param Context $context
@@ -34,10 +34,10 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
      * @param UploaderFactory $uploaderFactory
      * @param RequestDataInterface $requestData
      * @param Filesystem $filesystem
-     * @param AbstractResource $resource
-     * @param AbstractDb $resourceCollection
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null $resourceCollection
      * @param array $data
-     * @param File $file
+     * @param File|null $fileDriver
      */
     public function __construct(
         Context $context,
@@ -50,9 +50,9 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = [],
-        File $file = null
+        File $fileDriver = null
     ) {
-        $this->file = $file
+        $this->fileDriver = $fileDriver
             ?? ObjectManager::getInstance()->get(File::class);
         parent::__construct(
             $context,
@@ -75,10 +75,12 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
      */
     public function beforeSave()
     {
+        $folders = ['original', 'resize'];
+
         if (!empty($this->getFileData())) {
             $mimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
-            $correctMime = null;
+            $correctMime = false;
             foreach ($mimeTypes as $type) {
                 if (mime_content_type($this->getFileData()['tmp_name']) != $type) {
                     continue;
@@ -86,12 +88,15 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
                 $correctMime = true;
                 break;
             }
-            if ($correctMime === null) {
+            if ($correctMime === false) {
                 throw new LocalizedException(__('%1', 'The file has the wrong extension'));
             }
 
-            if (!$this->file->isReadable($this->_getUploadDir())) {
-                $this->file->createDirectory($this->_mediaDirectory->getAbsolutePath() . 'products_image/original');
+            if (!$this->fileDriver->isExists($this->_getUploadDir())) {
+                foreach ($folders as $folder) {
+                    $this->fileDriver
+                        ->createDirectory($this->_mediaDirectory->getAbsolutePath("products_image/$folder"));
+                }
             }
         }
 
@@ -101,10 +106,12 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
                 $this->_data["groups"]["smetana_group"]["fields"]["smetana_upload_image"]["value"]
             )
         ) {
-            $files = $this->file->readDirectory($this->_getUploadDir());
-            if ($files) {
-                foreach ($files as $file) {
-                    $this->file->deleteFile($file);
+            foreach ($folders as $folder) {
+                $files = $this->fileDriver->readDirectory($this->_mediaDirectory->getAbsolutePath("products_image/$folder"));
+                if ($files) {
+                    foreach ($files as $file) {
+                        $this->fileDriver->deleteFile($file);
+                    }
                 }
             }
         }

@@ -1,8 +1,6 @@
 <?php
 namespace Smetana\Images\Model\Frontend;
 
-use Magento\Framework\App\Helper\AbstractHelper;
-use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Image\AdapterFactory;
@@ -10,8 +8,11 @@ use Magento\Framework\Image\AdapterFactory;
 /**
  * Images helper
  */
-class Resize extends AbstractHelper
+class Resize
 {
+    const ORIG_PATH = 'products_image/original/';
+    const RESIZE_PATH = 'products_image/resize/';
+
     /**
      * Filesystem
      *
@@ -31,24 +32,21 @@ class Resize extends AbstractHelper
      *
      * @var File
      */
-    private $file;
+    private $fileDriver;
 
     /**
      * @param Filesystem $filesystem
      * @param AdapterFactory $imageFactory
-     * @param File $file
-     * @param Context $context
+     * @param File $fileDriver
      */
     public function __construct(
         Filesystem $filesystem,
         AdapterFactory $imageFactory,
-        File $file,
-        Context $context
+        File $fileDriver
     ) {
-        parent::__construct($context);
         $this->filesystem = $filesystem;
         $this->imageFactory = $imageFactory;
-        $this->file = $file;
+        $this->fileDriver = $fileDriver;
     }
 
     /**
@@ -65,24 +63,13 @@ class Resize extends AbstractHelper
     public function resize(string $image, int $width = null, int $height = null): string
     {
         $mediaDirectory = $this->filesystem->getDirectoryRead('media');
-        $origPath = $mediaDirectory->getAbsolutePath('products_image/original/' . $image);
-        $resizePath = $mediaDirectory->getAbsolutePath() . 'products_image/resize/';
-        $destinationPath = $resizePath . $width . $height . '_' . $image;
-        if (!$this->file->isFile($origPath)) {
+        $origPath = $mediaDirectory->getAbsolutePath(self::ORIG_PATH . $image);
+        $destinationPath = $mediaDirectory->getAbsolutePath() . self::RESIZE_PATH . $width . $height . '_' . $image;
+        if (!$this->fileDriver->isExists($origPath)) {
             return '';
         }
 
-        if (!$this->file->isFile($destinationPath)) {
-            if (!$this->file->isReadable($resizePath)) {
-                $this->file->createDirectory($resizePath);
-            }
-
-            $files = $this->file->readDirectory($resizePath);
-            if ($files) {
-                foreach ($files as $file) {
-                    $this->file->deleteFile($file);
-                }
-            }
+        if (!$this->fileDriver->isExists($destinationPath)) {
             $imageResize = $this->imageFactory->create();
             $imageResize->open($origPath);
             $imageResize->constrainOnly(true);

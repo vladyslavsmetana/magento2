@@ -3,14 +3,15 @@ namespace Smetana\Images\Block;
 
 use \Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\UrlInterface;
+use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\ScopeInterface;
 use Smetana\Images\Model\Frontend\Resize;
 
 /**
- * Returning complete image
+ * Block to display image on frontend product page
  */
-class Image extends \Magento\Framework\View\Element\Template
+class Image extends Template
 {
     /**
      * Scope Config Interface
