@@ -13,12 +13,20 @@ use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
 use Magento\MediaStorage\Model\File\UploaderFactory;
+use Smetana\Images\Model\Image\Delete;
 
 /**
- * Image Operations
+ * Image Saving Operations
  */
 class Image extends \Magento\Config\Model\Config\Backend\Image
 {
+    /**
+     * Delete Images Model
+     *
+     * @var Delete
+     */
+    private $deleteImageModel;
+
     /**
      * File Operations
      *
@@ -38,6 +46,7 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
      * @param AbstractDb|null $resourceCollection
      * @param array $data
      * @param File|null $fileDriver
+     * @param Delete|null $deleteImageModel
      */
     public function __construct(
         Context $context,
@@ -50,10 +59,13 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = [],
-        File $fileDriver = null
+        File $fileDriver = null,
+        Delete $deleteImageModel = null
     ) {
         $this->fileDriver = $fileDriver
             ?? ObjectManager::getInstance()->get(File::class);
+        $this->deleteImageModel = $deleteImageModel
+            ?? ObjectManager::getInstance()->get(Delete::class);
         parent::__construct(
             $context,
             $registry,
@@ -75,7 +87,7 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
      */
     public function beforeSave()
     {
-        $folders = ['original', 'resize'];
+        $folders = ['products_image/resize/', 'products_image/original/'];
 
         if (!empty($this->getFileData())) {
             $mimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
@@ -95,7 +107,7 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
             if (!$this->fileDriver->isExists($this->_getUploadDir())) {
                 foreach ($folders as $folder) {
                     $this->fileDriver
-                        ->createDirectory($this->_mediaDirectory->getAbsolutePath("products_image/$folder"));
+                        ->createDirectory($this->_mediaDirectory->getAbsolutePath($folder));
                 }
             }
         }
@@ -107,12 +119,7 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
             )
         ) {
             foreach ($folders as $folder) {
-                $files = $this->fileDriver->readDirectory($this->_mediaDirectory->getAbsolutePath("products_image/$folder"));
-                if ($files) {
-                    foreach ($files as $file) {
-                        $this->fileDriver->deleteFile($file);
-                    }
-                }
+                $this->deleteImageModel->deleteImage($folder);
             }
         }
 

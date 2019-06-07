@@ -10,7 +10,18 @@ use Magento\Framework\Image\AdapterFactory;
  */
 class Resize
 {
+    /**
+     * Path to Original folder
+     *
+     * @var String
+     */
     const ORIG_PATH = 'products_image/original/';
+
+    /**
+     * Path to Resize folder
+     *
+     * @var String
+     */
     const RESIZE_PATH = 'products_image/resize/';
 
     /**

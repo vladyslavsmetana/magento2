@@ -1,38 +1,36 @@
 <?php
 namespace Smetana\Images\Model\Config;
 
-use Magento\Framework\Filesystem;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Value;
 use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
+use Smetana\Images\Model\Image\Delete;
 
 /**
- * Checking Image Operations
+ * Checking Height of Image
  */
 class Height extends Value
 {
     /**
-     * Filesystem
+     * Path to Resize folder
      *
-     * @var Filesystem
+     * @var String
      */
-    private $filesystem;
+    const RESIZE_PATH = 'products_image/resize/';
 
     /**
-     * File Operations Class
+     * Delete Images Model
      *
-     * @var File
+     * @var Delete
      */
-    private $fileDriver;
+    private $deleteImageModel;
 
     /**
-     * @param Filesystem $filesystem
      * @param Context $context
      * @param Registry $registry
      * @param ScopeConfigInterface $config
@@ -40,10 +38,9 @@ class Height extends Value
      * @param AbstractResource|null $resource
      * @param AbstractDb|null $resourceCollection
      * @param array $data
-     * @param File|null $fileDriver
+     * @param Delete|null $deleteImageModel
      */
     public function __construct(
-        Filesystem $filesystem,
         Context $context,
         Registry $registry,
         ScopeConfigInterface $config,
@@ -51,11 +48,10 @@ class Height extends Value
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = [],
-        File $fileDriver = null
+        Delete $deleteImageModel = null
     ) {
-        $this->filesystem = $filesystem;
-        $this->fileDriver = $fileDriver
-            ?? ObjectManager::getInstance()->get(File::class);
+        $this->deleteImageModel = $deleteImageModel
+            ?? ObjectManager::getInstance()->get(Delete::class);
         parent::__construct(
             $context,
             $registry,
@@ -73,16 +69,7 @@ class Height extends Value
     public function beforeSave()
     {
         if ($this->isValueChanged()) {
-            $mediaDirectory = $this->filesystem->getDirectoryRead('media');
-            $resizePath = $mediaDirectory->getAbsolutePath() . 'products_image/resize/';
-            if ($this->fileDriver->isExists($resizePath)) {
-                $files = $this->fileDriver->readDirectory($resizePath);
-                if ($files) {
-                    foreach ($files as $file) {
-                        $this->fileDriver->deleteFile($file);
-                    }
-                }
-            }
+            $this->deleteImageModel->deleteImage(self::RESIZE_PATH);
         }
     }
 }
