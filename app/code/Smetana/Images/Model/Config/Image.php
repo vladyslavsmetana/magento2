@@ -21,6 +21,27 @@ use Smetana\Images\Model\Image\Delete;
 class Image extends Images
 {
     /**
+     * Mime type .jpeg
+     *
+     * @var String
+     */
+    const MIME_TYPE_JPEG = 'image/jpeg';
+
+    /**
+     * Mime type .png
+     *
+     * @var String
+     */
+    const MIME_TYPE_PNG = 'image/png';
+
+    /**
+     * Mime type .gif
+     *
+     * @var String
+     */
+    const MIME_TYPE_GIF = 'image/gif';
+
+    /**
      * Delete Images Model
      *
      * @var Delete
@@ -76,7 +97,7 @@ class Image extends Images
      */
     private function checkMimeType()
     {
-        $mimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        $mimeTypes = [self::MIME_TYPE_JPEG, self::MIME_TYPE_PNG, self::MIME_TYPE_GIF];
 
         $correctMime = false;
         foreach ($mimeTypes as $type) {
