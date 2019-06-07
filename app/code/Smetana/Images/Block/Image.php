@@ -6,7 +6,7 @@ use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Store\Model\ScopeInterface;
-use Smetana\Images\Model\Frontend\Resize;
+use Smetana\Images\Model\Image\Resize;
 
 /**
  * Block to display image on frontend product page

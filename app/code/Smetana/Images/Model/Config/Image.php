@@ -2,13 +2,13 @@
 namespace Smetana\Images\Model\Config;
 
 use Magento\Config\Model\Config\Backend\File\RequestData\RequestDataInterface;
+use Magento\Config\Model\Config\Backend\Image as Images;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem;
-use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
@@ -18,7 +18,7 @@ use Smetana\Images\Model\Image\Delete;
 /**
  * Image Saving Operations
  */
-class Image extends \Magento\Config\Model\Config\Backend\Image
+class Image extends Images
 {
     /**
      * Delete Images Model
@@ -26,13 +26,6 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
      * @var Delete
      */
     private $deleteImageModel;
-
-    /**
-     * File Operations
-     *
-     * @var File
-     */
-    private $fileDriver;
 
     /**
      * @param Context $context
@@ -45,7 +38,6 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
      * @param AbstractResource|null $resource
      * @param AbstractDb|null $resourceCollection
      * @param array $data
-     * @param File|null $fileDriver
      * @param Delete|null $deleteImageModel
      */
     public function __construct(
@@ -59,11 +51,8 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = [],
-        File $fileDriver = null,
         Delete $deleteImageModel = null
     ) {
-        $this->fileDriver = $fileDriver
-            ?? ObjectManager::getInstance()->get(File::class);
         $this->deleteImageModel = $deleteImageModel
             ?? ObjectManager::getInstance()->get(Delete::class);
         parent::__construct(
@@ -81,42 +70,39 @@ class Image extends \Magento\Config\Model\Config\Backend\Image
     }
 
     /**
-     * Changing process of saving image
+     * Checking mime type of saving image
      *
      * @throws LocalizedException
      */
+    private function checkMimeType()
+    {
+        $mimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+        $correctMime = false;
+        foreach ($mimeTypes as $type) {
+            if (mime_content_type($this->getFileData()['tmp_name']) != $type) {
+                continue;
+            }
+            $correctMime = true;
+            break;
+        }
+        if ($correctMime === false) {
+            throw new LocalizedException(__('%1', 'The file has the wrong extension'));
+        }
+    }
+
+    /**
+     * Changing process of saving image
+     */
     public function beforeSave()
     {
-        $folders = ['products_image/resize/', 'products_image/original/'];
-
         if (!empty($this->getFileData())) {
-            $mimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
-
-            $correctMime = false;
-            foreach ($mimeTypes as $type) {
-                if (mime_content_type($this->getFileData()['tmp_name']) != $type) {
-                    continue;
-                }
-                $correctMime = true;
-                break;
-            }
-            if ($correctMime === false) {
-                throw new LocalizedException(__('%1', 'The file has the wrong extension'));
-            }
-
-            if (!$this->fileDriver->isExists($this->_getUploadDir())) {
-                foreach ($folders as $folder) {
-                    $this->fileDriver
-                        ->createDirectory($this->_mediaDirectory->getAbsolutePath($folder));
-                }
-            }
+            $this->checkMimeType();
         }
+        $folders = [Delete::RESIZE_PATH, Delete::ORIG_PATH];
 
         if (!empty($this->getFileData())
-            || array_key_exists(
-                'delete',
-                $this->_data["groups"]["smetana_group"]["fields"]["smetana_upload_image"]["value"]
-            )
+            || $this->getValue('delete')
         ) {
             foreach ($folders as $folder) {
                 $this->deleteImageModel->deleteImage($folder);

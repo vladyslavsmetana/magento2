@@ -17,13 +17,6 @@ use Smetana\Images\Model\Image\Delete;
 class Width extends Value
 {
     /**
-     * Path to Resize folder
-     *
-     * @var String
-     */
-    const RESIZE_PATH = 'products_image/resize/';
-
-    /**
      * Delete Images Model
      *
      * @var Delete
@@ -69,7 +62,7 @@ class Width extends Value
     public function beforeSave()
     {
         if ($this->isValueChanged()) {
-            $this->deleteImageModel->deleteImage(self::RESIZE_PATH);
+            $this->deleteImageModel->deleteImage(Delete::RESIZE_PATH);
         }
     }
 }

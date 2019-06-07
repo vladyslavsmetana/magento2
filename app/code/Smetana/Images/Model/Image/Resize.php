@@ -1,29 +1,16 @@
 <?php
-namespace Smetana\Images\Model\Frontend;
+namespace Smetana\Images\Model\Image;
 
 use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Image\AdapterFactory;
+use Smetana\Images\Model\Image\Delete;
 
 /**
  * Images helper
  */
 class Resize
 {
-    /**
-     * Path to Original folder
-     *
-     * @var String
-     */
-    const ORIG_PATH = 'products_image/original/';
-
-    /**
-     * Path to Resize folder
-     *
-     * @var String
-     */
-    const RESIZE_PATH = 'products_image/resize/';
-
     /**
      * Filesystem
      *
@@ -74,8 +61,8 @@ class Resize
     public function resize(string $image, int $width = null, int $height = null): string
     {
         $mediaDirectory = $this->filesystem->getDirectoryRead('media');
-        $origPath = $mediaDirectory->getAbsolutePath(self::ORIG_PATH . $image);
-        $destinationPath = $mediaDirectory->getAbsolutePath() . self::RESIZE_PATH . $width . $height . '_' . $image;
+        $origPath = $mediaDirectory->getAbsolutePath(Delete::ORIG_PATH . $image);
+        $destinationPath = $mediaDirectory->getAbsolutePath() . Delete::RESIZE_PATH . $width . $height . '_' . $image;
         if (!$this->fileDriver->isExists($origPath)) {
             return '';
         }
