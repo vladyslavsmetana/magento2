@@ -15,8 +15,8 @@
                 <field id="smetana_upload_image" translate="label" type="image" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Select Image</label>
                     <backend_model>Smetana\Images\Model\Config\Image</backend_model>
-                    <base_url type="media" scope_info="1">products_image/original</base_url>
-                    <upload_dir>pub/media/products_image/original</upload_dir>
+                    <base_url type="media" scope_info="1">smetana/original</base_url>
+                    <upload_dir>pub/media/smetana/original</upload_dir>
                 </field>
                 <field id="image_width" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Image Width</label>
