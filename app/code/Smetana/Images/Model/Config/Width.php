@@ -12,7 +12,7 @@ use Magento\Framework\Registry;
 use Smetana\Images\Model\Image\Delete;
 
 /**
- * Checking Width of Image
+ * Checking Width of ImageTest
  */
 class Width extends Value
 {
@@ -57,12 +57,14 @@ class Width extends Value
     }
 
     /**
-     * Image width change check
+     * ImageTest width change check
      */
     public function beforeSave()
     {
         if ($this->isValueChanged()) {
             $this->deleteImageModel->deleteImage(Delete::RESIZE_PATH);
         }
+
+        return parent::beforeSave();
     }
 }

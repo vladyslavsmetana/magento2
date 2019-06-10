@@ -16,28 +16,28 @@ use Magento\MediaStorage\Model\File\UploaderFactory;
 use Smetana\Images\Model\Image\Delete;
 
 /**
- * Image Saving Operations
+ * ImageTest Saving Operations
  */
 class Image extends Images
 {
     /**
      * Mime type .jpeg
      *
-     * @var String
+     * @var string
      */
     const MIME_TYPE_JPEG = 'image/jpeg';
 
     /**
      * Mime type .png
      *
-     * @var String
+     * @var string
      */
     const MIME_TYPE_PNG = 'image/png';
 
     /**
      * Mime type .gif
      *
-     * @var String
+     * @var string
      */
     const MIME_TYPE_GIF = 'image/gif';
 

@@ -7,7 +7,7 @@ use Magento\Framework\Image\AdapterFactory;
 use Smetana\Images\Model\Image\Delete;
 
 /**
- * Image Resizing Operations
+ * ImageTest Resizing Operations
  */
 class Resize
 {
@@ -53,8 +53,6 @@ class Resize
      * @param string $image
      * @param int $width
      * @param int $height
-     *
-     * @throws \Magento\Framework\Exception\FileSystemException
      *
      * @return string
      */

@@ -15,14 +15,14 @@ class Delete
      *
      * @var String
      */
-    const ORIG_PATH = 'products_image/original/';
+    const ORIG_PATH = 'smetana/original/';
 
     /**
      * Path to Resize folder
      *
      * @var String
      */
-    const RESIZE_PATH = 'products_image/resize/';
+    const RESIZE_PATH = 'smetana/resize/';
 
     /**
      * Filesystem
@@ -44,11 +44,10 @@ class Delete
      */
     public function __construct(
         Filesystem $filesystem,
-        File $fileDriver = null
+        File $fileDriver
     ) {
         $this->filesystem = $filesystem;
-        $this->fileDriver = $fileDriver
-            ?? ObjectManager::getInstance()->get(File::class);
+        $this->fileDriver = $fileDriver;
     }
 
     /**
@@ -56,7 +55,7 @@ class Delete
      *
      * @param string $path
      *
-     * @throws \Magento\Framework\Exception\FileSystemException
+     * @return void
      */
     public function deleteImage(string $path)
     {

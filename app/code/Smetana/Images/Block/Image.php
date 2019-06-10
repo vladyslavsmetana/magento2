@@ -1,7 +1,7 @@
 <?php
 namespace Smetana\Images\Block;
 
-use \Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
@@ -21,7 +21,7 @@ class Image extends Template
     private $scopeConfig;
 
     /**
-     * Image Resize Model
+     * ImageTest Resize Model
      *
      * @var Resize
      */
