@@ -5,33 +5,42 @@ class HeightTest extends \PHPUnit\Framework\TestCase
 {
     private $heightModel;
 
-    private $heightModelMock;
+    private $deleteImageModel;
 
     protected function setUp()
     {
+        $this->deleteImageModel = $this->createMock(\Smetana\Images\Model\Image\Delete::class);
+
         $this->heightModel = (new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this))->getObject(
-            \Smetana\Images\Model\Config\Height::class
+            \Smetana\Images\Model\Config\Height::class,
+            [
+                'deleteImageModel' => $this->deleteImageModel
+            ]
         );
-        $this->heightModelMock = $this->createMock(\Smetana\Images\Model\Config\Height::class);
     }
 
     public function testFalseBeforeSave()
     {
-        $this->assertEquals($this->heightModel->isValueChanged(), false);
+        $this->assertEquals(false, $this->heightModel->isValueChanged());
         $actual = $this->heightModel->beforeSave();
         $this->assertEquals($this->heightModel, $actual);
     }
 
     public function testTrueBeforeSave()
     {
-        //$this->assertEquals($this->heightModel->isValueChanged(), false);
 
-        $this->heightModelMock
-            ->expects($this->any())
-            ->method('isValueChanged')
-            ->willReturn(true);
-        $this->assertEquals($this->heightModelMock->isValueChanged(), true);
-        $actual = $this->heightModelMock->beforeSave();
-        $this->assertEquals($this->heightModelMock, $actual);
+        $this->heightModel->setValue('444');
+        $this->heightModel->setOldValue('444');
+
+        $this->assertEquals(true, $this->heightModel->isValueChanged());
+
+        $this->deleteImageModel
+            ->expects($this->once())
+            ->method('deleteImage')
+            ->with('smetana/resize/')
+            ->willReturn(null);
+
+        $actual = $this->heightModel->beforeSave();
+        $this->assertEquals($this->heightModel, $actual);
     }
 }
