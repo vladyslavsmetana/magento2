@@ -68,8 +68,8 @@ class Resize
         if (!$this->fileDriver->isExists($destinationPath)) {
             $imageResize = $this->imageFactory->create();
             $imageResize->open($origPath);
-            $imageResize->constrainOnly(true);
-            $imageResize->keepTransparency(true);
+            //$imageResize->constrainOnly(true);
+            //$imageResize->keepTransparency(true);
             $imageResize->resize($width, $height);
             $imageResize->save($destinationPath);
         }

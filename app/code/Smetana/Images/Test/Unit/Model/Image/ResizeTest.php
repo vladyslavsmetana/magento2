@@ -6,7 +6,7 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
     /**
      * @var \Smetana\Images\Model\Image\Resize
      */
-    protected $resizeModel;
+    private $resizeModel;
 
     /**
      * @var \Magento\Framework\Filesystem
@@ -16,7 +16,7 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
     /**
      * @var \Magento\Framework\Filesystem\Driver\File
      */
-    protected $fileDriver;
+    private $fileDriver;
 
     /**
      * @var \Magento\Framework\Image\AdapterFactory
@@ -39,7 +39,7 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testResize()
+    public function testResize()    //!!!!!!!!!!!!!!!!!!!!!реальні довгі path не використовувати
     {
         $mediaDirectory = $this->createMock(\Magento\Framework\Filesystem\Directory\ReadInterface::class);
         $this->filesystem
@@ -51,8 +51,6 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
         $mediaDirectory
             ->expects($this->any())
             ->method('getAbsolutePath')
-//            ->with('smetana/original/2.jpeg')
-//            ->willReturn('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/original/2.jpeg')
             ->withConsecutive(
                 ['smetana/original/2.jpeg'],
                 ['']
@@ -66,7 +64,7 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
             ->expects($this->any())
             ->method('isExists')
             ->withConsecutive(
-                ['/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/original/2.jpeg'],
+                ['/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/original/2.jpeg',],
                 ['/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/444444_2.jpeg']
             )
             ->willReturnOnConsecutiveCalls(
@@ -74,41 +72,24 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
                 false
             );
 
-        $mediaFactory = $this->createMock(\Magento\Framework\Image\Adapter\AdapterInterface::class);
+        $imageResize = $this->createMock(\Magento\Framework\Image\Adapter\AdapterInterface::class);
+
         $this->imageFactory
             ->expects($this->once())
             ->method('create')
-            ->willReturn($mediaFactory);
+            ->willReturn($imageResize);
 
-        $mediaFactory
-            ->expects($this->once())
-            ->method('open')
-            ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/original/2.jpeg')
-            ->willReturn(null);
-
-        /*$mediaFactory
-            ->expects($this->once())
-            ->method('constrainOnly')
-            ->with(true)
-            ->willReturn(true);*/
-
-        /*$mediaFactory
-            ->expects($this->once())
-            ->method('keepTransparency')
-            ->with(true)
-            ->willReturn(true);*/
-
-        $mediaFactory
+        $imageResize
             ->expects($this->once())
             ->method('resize')
             ->with(444, 444)
-            ->willReturn(null);
+            ->willReturn(true);
 
-        $mediaFactory
+        $imageResize
             ->expects($this->once())
             ->method('save')
             ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/444444_2.jpeg')
-            ->willReturn(null);
+            ->willReturn(true);
 
         $mediaDirectory
             ->expects($this->once())
@@ -116,7 +97,8 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
             ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/444444_2.jpeg')
             ->willReturn('smetana/resize/444444_2.jpeg');
 
-        $actual = $this->resizeModel->resize('2.jpeg');
+
+        $actual = $this->resizeModel->resize('2.jpeg', 444, 444);
         $this->assertEquals('smetana/resize/444444_2.jpeg', $actual);
     }
 }

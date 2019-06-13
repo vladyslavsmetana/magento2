@@ -1,8 +1,6 @@
 <?php
 namespace Smetana\Images\Test\Unit\Block;
 
-use Magento\Framework\App\ObjectManager;
-
 class ImageTest extends \PHPUnit\Framework\TestCase
 {
     /**
@@ -23,15 +21,13 @@ class ImageTest extends \PHPUnit\Framework\TestCase
     /**
      * @var \Magento\Framework\View\Element\Context
      */
-    private $context;
+    //private $context;
 
     /*public function __construct(
-        \Magento\Framework\View\Element\Context $context = null
+        \Magento\Framework\View\Element\Context $context
     ) {
-        $this->context = $context
-            ?? ObjectManager::getInstance()->create('\Magento\Framework\View\Element\Context');
+        $this->context = $context;
     }*/
-
 
     protected function setUp()
     {

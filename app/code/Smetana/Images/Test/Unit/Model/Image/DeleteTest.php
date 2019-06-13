@@ -53,7 +53,19 @@ class DeleteTest extends \PHPUnit\Framework\TestCase
             ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/')
             ->willReturn(true);
 
-        $this->deleteModel->deleteImage('smetana/original/');
-        //$this->assertEquals(null, $actual);
+        $this->fileDriver
+            ->expects($this->once())
+            ->method('readDirectory')
+            ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/')
+            ->willReturn(['/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/2.jpeg']);
+
+        $this->fileDriver
+            ->expects($this->once())
+            ->method('deleteFile')
+            ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/2.jpeg')
+            ->willReturn(true);
+
+        $actual = $this->deleteModel->deleteImage('smetana/original/');
+        $this->assertEquals(null, $actual);
     }
 }
