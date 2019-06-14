@@ -1,36 +1,45 @@
 <?php
 namespace Smetana\Images\Test\Unit\Model\Image;
 
-class ResizeTest extends \PHPUnit\Framework\TestCase
+use Magento\Framework\Filesystem;
+use Magento\Framework\Filesystem\Directory\ReadInterface;
+use Magento\Framework\Filesystem\Driver\File;
+use Magento\Framework\Image\Adapter\AdapterInterface;
+use Magento\Framework\Image\AdapterFactory;
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use PHPUnit\Framework\TestCase;
+use Smetana\Images\Model\Image\Resize;
+
+class ResizeTest extends TestCase
 {
     /**
-     * @var \Smetana\Images\Model\Image\Resize
+     * @var Resize
      */
     private $resizeModel;
 
     /**
-     * @var \Magento\Framework\Filesystem
+     * @var Filesystem
      */
     private $filesystem;
 
     /**
-     * @var \Magento\Framework\Filesystem\Driver\File
+     * @var File
      */
     private $fileDriver;
 
     /**
-     * @var \Magento\Framework\Image\AdapterFactory
+     * @var AdapterFactory
      */
     private $imageFactory;
 
     protected function setUp()
     {
-        $this->filesystem = $this->createMock(\Magento\Framework\Filesystem::class);
-        $this->fileDriver = $this->createMock(\Magento\Framework\Filesystem\Driver\File::class);
-        $this->imageFactory = $this->createMock(\Magento\Framework\Image\AdapterFactory::class);
+        $this->filesystem = $this->createMock(Filesystem::class);
+        $this->fileDriver = $this->createMock(File::class);
+        $this->imageFactory = $this->createMock(AdapterFactory::class);
 
-        $this->resizeModel = (new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this))->getObject(
-            \Smetana\Images\Model\Image\Resize::class,
+        $this->resizeModel = (new ObjectManager($this))->getObject(
+            Resize::class,
             [
                 'filesystem' => $this->filesystem,
                 'imageFactory' => $this->imageFactory,
@@ -49,7 +58,7 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
         $absoluteOrigFilePath = $mediaPath . $origPath . $fileName;
         $absoluteResizeFilePath = $mediaPath . $resizePath . $size . $size . '_' . $fileName;
 
-        $mediaDirectory = $this->createMock(\Magento\Framework\Filesystem\Directory\ReadInterface::class);
+        $mediaDirectory = $this->createMock(ReadInterface::class);
         $this->filesystem
             ->expects($this->once())
             ->method('getDirectoryRead')
@@ -80,7 +89,7 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
                 false
             );
 
-        $imageResize = $this->createMock(\Magento\Framework\Image\Adapter\AdapterInterface::class);
+        $imageResize = $this->createMock(AdapterInterface::class);
 
         $this->imageFactory
             ->expects($this->once())

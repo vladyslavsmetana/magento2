@@ -1,18 +1,29 @@
 <?php
 namespace Smetana\Images\Test\Unit\Model\Config;
 
-class WidthTest extends \PHPUnit\Framework\TestCase
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use PHPUnit\Framework\TestCase;
+use Smetana\Images\Model\Config\Width;
+use Smetana\Images\Model\Image\Delete;
+
+class WidthTest extends TestCase
 {
+    /**
+     * @var Width
+     */
     private $widthModel;
 
+    /**
+     * @var Delete
+     */
     private $deleteImageModel;
 
     protected function setUp()
     {
-        $this->deleteImageModel = $this->createMock(\Smetana\Images\Model\Image\Delete::class);
+        $this->deleteImageModel = $this->createMock(Delete::class);
 
-        $this->widthModel = (new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this))->getObject(
-            \Smetana\Images\Model\Config\Width::class,
+        $this->widthModel = (new ObjectManager($this))->getObject(
+            Width::class,
             [
                 'deleteImageModel' => $this->deleteImageModel
             ]
@@ -28,8 +39,7 @@ class WidthTest extends \PHPUnit\Framework\TestCase
 
     public function testTrueBeforeSave()
     {
-        $this->widthModel->setValue('444');
-        $this->widthModel->setOldValue('444');
+        $this->widthModel->setValue('value');
 
         $this->assertEquals(true, $this->widthModel->isValueChanged());
 

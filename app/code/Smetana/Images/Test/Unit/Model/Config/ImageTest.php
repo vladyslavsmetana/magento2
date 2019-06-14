@@ -1,22 +1,37 @@
 <?php
 namespace Smetana\Images\Test\Unit\Model\Config;
 
-class ImageTest extends \PHPUnit\Framework\TestCase
+use Magento\Config\Model\Config\Backend\File\RequestData\RequestDataInterface;
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use PHPUnit\Framework\TestCase;
+use Smetana\Images\Model\Config\Image;
+use Smetana\Images\Model\Image\Delete;
+
+class ImageTest extends TestCase
 {
+    /**
+     * @var Image
+     */
     private $imageModel;
 
+    /**
+     * @var RequestDataInterface
+     */
     private $requestData;
 
+    /**
+     * @var Delete
+     */
     private $deleteImageModel;
 
     protected function setUp()
     {
-        $this->requestData = $this->createMock(\Magento\Config\Model\Config\Backend\File\RequestData\RequestDataInterface::class);
+        $this->requestData = $this->createMock(RequestDataInterface::class);
 
-        $this->deleteImageModel = $this->createMock(\Smetana\Images\Model\Image\Delete::class);
+        $this->deleteImageModel = $this->createMock(Delete::class);
 
-        $this->imageModel = (new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this))->getObject(
-            \Smetana\Images\Model\Config\Image::class,
+        $this->imageModel = (new ObjectManager($this))->getObject(
+            Image::class,
             [
                 'requestData' => $this->requestData,
                 'deleteImageModel' => $this->deleteImageModel
@@ -26,15 +41,18 @@ class ImageTest extends \PHPUnit\Framework\TestCase
 
     public function testBeforeSave()
     {
-        $this->imageModel->setValue(['value' => '2.jpeg']);
-        $this->imageModel->setPath('smetana_section/smetana_group/smetana_upload_image');
+        $fileName = 'filename.ext1';
+        $imageParameter = 'smetana_section/smetana_group/smetana_upload_image';
+
+        $this->imageModel->setValue(['value ' => $fileName]);
+        $this->imageModel->setPath($imageParameter);
 
         $this->requestData
             ->expects($this->any())
             ->method('getTmpName')
             ->withConsecutive(
-                ['smetana_section/smetana_group/smetana_upload_image'],
-                ['smetana_section/smetana_group/smetana_upload_image']
+                [$imageParameter],
+                [$imageParameter]
             )
             ->willReturnOnConsecutiveCalls(
                 false,
@@ -44,10 +62,6 @@ class ImageTest extends \PHPUnit\Framework\TestCase
         $this->deleteImageModel
             ->expects($this->any())
             ->method('deleteImage')
-            ->withConsecutive(
-                ['smetana/resize/'],
-                ['smetana/original/']
-            )
             ->willReturnOnConsecutiveCalls(
                 null,
                 null

@@ -1,18 +1,29 @@
 <?php
 namespace Smetana\Images\Test\Unit\Model\Config;
 
-class HeightTest extends \PHPUnit\Framework\TestCase
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use PHPUnit\Framework\TestCase;
+use Smetana\Images\Model\Config\Height;
+use Smetana\Images\Model\Image\Delete;
+
+class HeightTest extends TestCase
 {
+    /**
+     * @var Height
+     */
     private $heightModel;
 
+    /**
+     * @var Delete
+     */
     private $deleteImageModel;
 
     protected function setUp()
     {
-        $this->deleteImageModel = $this->createMock(\Smetana\Images\Model\Image\Delete::class);
+        $this->deleteImageModel = $this->createMock(Delete::class);
 
-        $this->heightModel = (new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this))->getObject(
-            \Smetana\Images\Model\Config\Height::class,
+        $this->heightModel = (new ObjectManager($this))->getObject(
+            Height::class,
             [
                 'deleteImageModel' => $this->deleteImageModel
             ]
@@ -28,9 +39,7 @@ class HeightTest extends \PHPUnit\Framework\TestCase
 
     public function testTrueBeforeSave()
     {
-
-        $this->heightModel->setValue('444');
-        $this->heightModel->setOldValue('444');
+        $this->heightModel->setValue('value');
 
         $this->assertEquals(true, $this->heightModel->isValueChanged());
 

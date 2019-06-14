@@ -1,30 +1,37 @@
 <?php
 namespace Smetana\Images\Test\Unit\Model\Image;
 
-class DeleteTest extends \PHPUnit\Framework\TestCase
+use Magento\Framework\Filesystem;
+use Magento\Framework\Filesystem\Directory\ReadInterface;
+use Magento\Framework\Filesystem\Driver\File;
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use PHPUnit\Framework\TestCase;
+use Smetana\Images\Model\Image\Delete;
+
+class DeleteTest extends TestCase
 {
     /**
-     * @var \Smetana\Images\Model\Image\Delete
+     * @var Delete
      */
     private $deleteModel;
 
     /**
-     * @var \Magento\Framework\Filesystem
+     * @var Filesystem
      */
     private $filesystem;
 
     /**
-     * @var \Magento\Framework\Filesystem\Driver\File
+     * @var File
      */
     private $fileDriver;
 
     protected function setUp()
     {
-        $this->filesystem = $this->createMock(\Magento\Framework\Filesystem::class);
-        $this->fileDriver = $this->createMock(\Magento\Framework\Filesystem\Driver\File::class);
+        $this->filesystem = $this->createMock(Filesystem::class);
+        $this->fileDriver = $this->createMock(File::class);
 
-        $this->deleteModel = (new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this))->getObject(
-            \Smetana\Images\Model\Image\Delete::class,
+        $this->deleteModel = (new ObjectManager($this))->getObject(
+            Delete::class,
             [
                 'filesystem' => $this->filesystem,
                 'fileDriver' => $this->fileDriver,
@@ -32,9 +39,15 @@ class DeleteTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testDeleteImage()
+    public function testDeleteResizeImage()
     {
-        $mediaDirectory = $this->createMock(\Magento\Framework\Filesystem\Directory\ReadInterface::class);
+        $size = 444;
+        $mediaPath = '/a/b/c/pub/media/';
+        $fileName = 'filename.ext1';
+        $resizePath = 'smetana/resize/';
+        $absoluteResizeFilePath = $mediaPath . $resizePath . $size . $size . '_' . $fileName;
+
+        $mediaDirectory = $this->createMock(ReadInterface::class);
         $this->filesystem
             ->expects($this->once())
             ->method('getDirectoryRead')
@@ -44,28 +57,70 @@ class DeleteTest extends \PHPUnit\Framework\TestCase
         $mediaDirectory
             ->expects($this->once())
             ->method('getAbsolutePath')
-            ->with('smetana/original/')
-            ->willReturn('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/');
+            ->with($resizePath)
+            ->willReturn($mediaPath . $resizePath);
 
         $this->fileDriver
             ->expects($this->once())
             ->method('isExists')
-            ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/')
+            ->with($mediaPath . $resizePath)
             ->willReturn(true);
 
         $this->fileDriver
             ->expects($this->once())
             ->method('readDirectory')
-            ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/')
-            ->willReturn(['/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/2.jpeg']);
+            ->with($mediaPath . $resizePath)
+            ->willReturn([$absoluteResizeFilePath]);
 
         $this->fileDriver
             ->expects($this->once())
             ->method('deleteFile')
-            ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/2.jpeg')
+            ->with($absoluteResizeFilePath)
             ->willReturn(true);
 
-        $actual = $this->deleteModel->deleteImage('smetana/original/');
+        $actual = $this->deleteModel->deleteImage($resizePath);
+        $this->assertEquals(null, $actual);
+    }
+
+    public function testDeleteOrigImage()
+    {
+        $mediaPath = '/a/b/c/pub/media/';
+        $fileName = 'filename.ext1';
+        $origPath = 'smetana/original/';
+        $absoluteOrigFilePath = $mediaPath . $origPath . $fileName;
+
+        $mediaDirectory = $this->createMock(ReadInterface::class);
+        $this->filesystem
+            ->expects($this->once())
+            ->method('getDirectoryRead')
+            ->with('media')
+            ->willReturn($mediaDirectory);
+
+        $mediaDirectory
+            ->expects($this->once())
+            ->method('getAbsolutePath')
+            ->with($origPath)
+            ->willReturn($mediaPath . $origPath);
+
+        $this->fileDriver
+            ->expects($this->once())
+            ->method('isExists')
+            ->with($mediaPath . $origPath)
+            ->willReturn(true);
+
+        $this->fileDriver
+            ->expects($this->once())
+            ->method('readDirectory')
+            ->with($mediaPath . $origPath)
+            ->willReturn([$absoluteOrigFilePath]);
+
+        $this->fileDriver
+            ->expects($this->once())
+            ->method('deleteFile')
+            ->with($absoluteOrigFilePath)
+            ->willReturn(true);
+
+        $actual = $this->deleteModel->deleteImage($origPath);
         $this->assertEquals(null, $actual);
     }
 }
