@@ -10,6 +10,13 @@ use Smetana\Images\Model\Image\Delete;
 class ImageTest extends TestCase
 {
     /**
+     * Image name Configuration
+     *
+     * @var String
+     */
+    const IMAGE_NAME_CONF = 'smetana_section/smetana_group/smetana_upload_image';
+
+    /**
      * @var Image
      */
     private $imageModel;
@@ -24,6 +31,9 @@ class ImageTest extends TestCase
      */
     private $deleteImageModel;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->requestData = $this->createMock(RequestDataInterface::class);
@@ -42,17 +52,16 @@ class ImageTest extends TestCase
     public function testBeforeSave()
     {
         $fileName = 'filename.ext1';
-        $imageParameter = 'smetana_section/smetana_group/smetana_upload_image';
 
         $this->imageModel->setValue(['value ' => $fileName]);
-        $this->imageModel->setPath($imageParameter);
+        $this->imageModel->setPath(self::IMAGE_NAME_CONF);
 
         $this->requestData
             ->expects($this->any())
             ->method('getTmpName')
             ->withConsecutive(
-                [$imageParameter],
-                [$imageParameter]
+                [self::IMAGE_NAME_CONF],
+                [self::IMAGE_NAME_CONF]
             )
             ->willReturnOnConsecutiveCalls(
                 false,

@@ -13,6 +13,13 @@ use Smetana\Images\Model\Image\Resize;
 class ResizeTest extends TestCase
 {
     /**
+     * Size of Image
+     *
+     * @var Integer
+     */
+    const IMAGE_SIZE = 444;
+
+    /**
      * @var Resize
      */
     private $resizeModel;
@@ -32,6 +39,9 @@ class ResizeTest extends TestCase
      */
     private $imageFactory;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->filesystem = $this->createMock(Filesystem::class);
@@ -50,13 +60,12 @@ class ResizeTest extends TestCase
 
     public function testResize()
     {
-        $size = 444;
         $mediaPath = '/a/b/c/pub/media/';
         $fileName = 'filename.ext1';
         $origPath = 'smetana/original/';
         $resizePath = 'smetana/resize/';
         $absoluteOrigFilePath = $mediaPath . $origPath . $fileName;
-        $absoluteResizeFilePath = $mediaPath . $resizePath . $size . $size . '_' . $fileName;
+        $absoluteResizeFilePath = $mediaPath . $resizePath . self::IMAGE_SIZE . self::IMAGE_SIZE . '_' . $fileName;
 
         $mediaDirectory = $this->createMock(ReadInterface::class);
         $this->filesystem
@@ -99,7 +108,7 @@ class ResizeTest extends TestCase
         $imageResize
             ->expects($this->once())
             ->method('resize')
-            ->with($size, $size)
+            ->with(self::IMAGE_SIZE, self::IMAGE_SIZE)
             ->willReturn(true);
 
         $imageResize
@@ -115,7 +124,7 @@ class ResizeTest extends TestCase
             ->willReturn($origPath . $fileName);
 
 
-        $actual = $this->resizeModel->resize($fileName, $size, $size);
+        $actual = $this->resizeModel->resize($fileName, self::IMAGE_SIZE, self::IMAGE_SIZE);
         $this->assertEquals($origPath . $fileName, $actual);
     }
 }

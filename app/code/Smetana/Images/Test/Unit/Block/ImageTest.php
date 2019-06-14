@@ -1,102 +1,146 @@
 <?php
 namespace Smetana\Images\Test\Unit\Block;
 
-use Magento\Framework\App\ObjectManager;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Setup\Declaration\Schema\Dto\Columns\Integer;
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use Magento\Framework\UrlInterface;
+use Magento\Framework\View\Element\Template\Context;
+use PHPUnit\Framework\TestCase;
+use Smetana\Images\Block\Image;
+use Smetana\Images\Model\Image\Resize;
 
-class ImageTest extends \PHPUnit\Framework\TestCase
+class ImageTest extends TestCase
 {
     /**
-     * @var \Smetana\Images\Block\Image
+     * Size of Image
+     *
+     * @var Integer
+     */
+    const IMAGE_SIZE = 444;
+
+    /**
+     * Name of Image
+     *
+     * @var String
+     */
+    const FILE_NAME = 'filename.ext1';
+
+    /**
+     * Path to Configurations
+     *
+     * @var String
+     */
+    const CONFIG_PATH = 'smetana_section/smetana_group/';
+
+    /**
+     * Path to Image name
+     *
+     * @var String
+     */
+    const NAME_OPTION = 'smetana_upload_image';
+
+    /**
+     * Path to Image width
+     *
+     * @var String
+     */
+    const WIDTH_OPTION = 'image_width';
+
+    /**
+     * Path to Image height
+     *
+     * @var String
+     */
+    const HEIGHT_OPTION = 'image_height';
+
+    /**
+     * @var Image
      */
     private $imageBlock;
 
     /**
-     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     * @var ScopeConfigInterface
      */
     private $scopeConfig;
 
     /**
-     * @var \Smetana\Images\Model\Image\Resize
+     * @var Resize
      */
     private $resize;
 
     /**
-     * @var \Magento\Framework\View\Element\Context
+     * @var Context
      */
-    private $_urlBuilder;
+    private $urlBuilder;
 
-    public function __construct(
-        \Magento\Framework\View\Element\Context $_urlBuilder = null
-    ) {
-        $this->_urlBuilder = $_urlBuilder
-            ?? ObjectManager::getInstance()->get(\Magento\Framework\View\Element\Context::class);
-    }
-
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
-        $this->scopeConfig = $this->createMock(\Magento\Framework\App\Config\ScopeConfigInterface::class);
+        $this->urlBuilder = $this->createMock(UrlInterface::class);
+        $context = $this->createMock(Context::class);
+        $context->expects($this->once())
+            ->method('getUrlBuilder')
+            ->willReturn($this->urlBuilder);
 
-        $this->resize = $this->createMock(\Smetana\Images\Model\Image\Resize::class);
+        $this->scopeConfig = $this->createMock(ScopeConfigInterface::class);
 
-        //$this->_urlBuilder = $this->createMock(\Magento\Framework\View\Element\Context::class);
+        $this->resize = $this->createMock(Resize::class);
 
-        $this->imageBlock = (new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this))->getObject(
-            \Smetana\Images\Block\Image::class,
+
+        $this->imageBlock = (new ObjectManager($this))->getObject(
+            Image::class,
             [
                 'scopeConfig' => $this->scopeConfig,
                 'resize'      => $this->resize,
-                '_urlBuilder' => $this->_urlBuilder
+                'context' => $context
             ]
         );
     }
 
     public function testGetImage()
     {
-        $size = 444;
-        $fileName = 'filename.ext1';
-        $configPath = 'smetana_section/smetana_group/';
-        $imagePath = 'smetana/resize/' . $size . $size . '_' . $fileName;
+        $imagePath = 'smetana/resize/' . self::IMAGE_SIZE . self::IMAGE_SIZE . '_' . self::FILE_NAME;
+        $imageUrl = 'http://mage.com/pub/media/';
 
         $this->scopeConfig
             ->expects($this->any())
             ->method('getValue')
             ->withConsecutive(
-                [$configPath . 'smetana_upload_image'],
-                [$configPath . 'image_width'],
-                [$configPath . 'image_height']
+                [self::CONFIG_PATH . self::NAME_OPTION],
+                [self::CONFIG_PATH . self::WIDTH_OPTION],
+                [self::CONFIG_PATH . self::HEIGHT_OPTION]
             )
-            ->willReturnOnConsecutiveCalls($fileName, $size, $size);
+            ->willReturnOnConsecutiveCalls(self::FILE_NAME, self::IMAGE_SIZE, self::IMAGE_SIZE);
 
         $this->resize
             ->expects($this->once())
             ->method('resize')
             ->willReturn($imagePath);
 
-        /*$this->_urlBuilder
+        $this->urlBuilder
             ->expects($this->once())
             ->method('getBaseUrl')
-            ->will(['_type' => 'media'])
-            ->willReturn('444');*/
-
+            ->with(['_type' => 'media'])
+            ->willReturn($imageUrl);
 
         $actual = $this->imageBlock->getImage();
-        $this->assertEquals($imagePath, $actual);
+        $this->assertEquals($imageUrl . $imagePath, $actual);
     }
 
     public function testGetAbsentImage()
     {
-        $size = 444;
-        $configPath = 'smetana_section/smetana_group/';
-
         $this->scopeConfig
             ->expects($this->any())
             ->method('getValue')
             ->withConsecutive(
-                [$configPath . 'smetana_upload_image'],
-                [$configPath . 'image_width'],
-                [$configPath . 'image_height']
+                [self::CONFIG_PATH . self::NAME_OPTION],
+                [self::CONFIG_PATH . self::WIDTH_OPTION],
+                [self::CONFIG_PATH . self::HEIGHT_OPTION]
             )
-            ->willReturnOnConsecutiveCalls('filename.ext1', $size, $size);
+            ->willReturnOnConsecutiveCalls(self::FILE_NAME, self::IMAGE_SIZE, self::IMAGE_SIZE);
 
         $this->resize
             ->expects($this->once())

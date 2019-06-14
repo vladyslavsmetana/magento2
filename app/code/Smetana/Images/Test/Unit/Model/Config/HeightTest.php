@@ -18,6 +18,9 @@ class HeightTest extends TestCase
      */
     private $deleteImageModel;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->deleteImageModel = $this->createMock(Delete::class);
