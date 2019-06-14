@@ -39,8 +39,16 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testResize()    //!!!!!!!!!!!!!!!!!!!!!реальні довгі path не використовувати
+    public function testResize()
     {
+        $size = 444;
+        $mediaPath = '/a/b/c/pub/media/';
+        $fileName = 'filename.ext1';
+        $origPath = 'smetana/original/';
+        $resizePath = 'smetana/resize/';
+        $absoluteOrigFilePath = $mediaPath . $origPath . $fileName;
+        $absoluteResizeFilePath = $mediaPath . $resizePath . $size . $size . '_' . $fileName;
+
         $mediaDirectory = $this->createMock(\Magento\Framework\Filesystem\Directory\ReadInterface::class);
         $this->filesystem
             ->expects($this->once())
@@ -52,20 +60,20 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
             ->expects($this->any())
             ->method('getAbsolutePath')
             ->withConsecutive(
-                ['smetana/original/2.jpeg'],
+                [$origPath . $fileName],
                 ['']
             )
             ->willReturnOnConsecutiveCalls(
-                '/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/original/2.jpeg',
-                '/home/vladyslav/sites/2.3-dev/magefilter/pub/media/'
+                $absoluteOrigFilePath,
+                $mediaPath
             );
 
         $this->fileDriver
             ->expects($this->any())
             ->method('isExists')
             ->withConsecutive(
-                ['/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/original/2.jpeg',],
-                ['/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/444444_2.jpeg']
+                [$absoluteOrigFilePath],
+                [$absoluteResizeFilePath]
             )
             ->willReturnOnConsecutiveCalls(
                 true,
@@ -82,23 +90,23 @@ class ResizeTest extends \PHPUnit\Framework\TestCase
         $imageResize
             ->expects($this->once())
             ->method('resize')
-            ->with(444, 444)
+            ->with($size, $size)
             ->willReturn(true);
 
         $imageResize
             ->expects($this->once())
             ->method('save')
-            ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/444444_2.jpeg')
+            ->with($absoluteResizeFilePath)
             ->willReturn(true);
 
         $mediaDirectory
             ->expects($this->once())
             ->method('getRelativePath')
-            ->with('/home/vladyslav/sites/2.3-dev/magefilter/pub/media/smetana/resize/444444_2.jpeg')
-            ->willReturn('smetana/resize/444444_2.jpeg');
+            ->with($absoluteResizeFilePath)
+            ->willReturn($origPath . $fileName);
 
 
-        $actual = $this->resizeModel->resize('2.jpeg', 444, 444);
-        $this->assertEquals('smetana/resize/444444_2.jpeg', $actual);
+        $actual = $this->resizeModel->resize($fileName, $size, $size);
+        $this->assertEquals($origPath . $fileName, $actual);
     }
 }
