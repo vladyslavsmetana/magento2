@@ -7,6 +7,9 @@ use PHPUnit\Framework\TestCase;
 use Smetana\Images\Model\Config\Image;
 use Smetana\Images\Model\Image\Delete;
 
+/**
+ * @covers \Smetana\Images\Model\Config\Image
+ */
 class ImageTest extends TestCase
 {
     /**
@@ -17,46 +20,51 @@ class ImageTest extends TestCase
     const IMAGE_NAME_CONF = 'smetana_section/smetana_group/smetana_upload_image';
 
     /**
+     * @var RequestDataInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $requestDataMock;
+
+    /**
+     * @var Delete|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $deleteImageMock;
+
+    /**
      * @var Image
      */
     private $imageModel;
-
-    /**
-     * @var RequestDataInterface
-     */
-    private $requestData;
-
-    /**
-     * @var Delete
-     */
-    private $deleteImageModel;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->requestData = $this->createMock(RequestDataInterface::class);
+        $this->requestDataMock = $this->createMock(RequestDataInterface::class);
 
-        $this->deleteImageModel = $this->createMock(Delete::class);
+        $this->deleteImageMock = $this->createMock(Delete::class);
 
         $this->imageModel = (new ObjectManager($this))->getObject(
             Image::class,
             [
-                'requestData' => $this->requestData,
-                'deleteImageModel' => $this->deleteImageModel
+                'requestData' => $this->requestDataMock,
+                'deleteImage' => $this->deleteImageMock
             ]
         );
     }
 
-    public function testBeforeSave()
+    /**
+     * Testing process of saving image
+     *
+     * @return void
+     */
+    public function testBeforeSave(): void
     {
         $fileName = 'filename.ext1';
 
         $this->imageModel->setValue(['value ' => $fileName]);
         $this->imageModel->setPath(self::IMAGE_NAME_CONF);
 
-        $this->requestData
+        $this->requestDataMock
             ->expects($this->any())
             ->method('getTmpName')
             ->withConsecutive(
@@ -68,7 +76,7 @@ class ImageTest extends TestCase
                 '/tmp/phpgHrwD1'
             );
 
-        $this->deleteImageModel
+        $this->deleteImageMock
             ->expects($this->any())
             ->method('deleteImage')
             ->willReturnOnConsecutiveCalls(

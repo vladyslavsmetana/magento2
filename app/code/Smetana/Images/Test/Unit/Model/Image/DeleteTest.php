@@ -8,6 +8,9 @@ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\TestCase;
 use Smetana\Images\Model\Image\Delete;
 
+/**
+ * @covers \Smetana\Images\Model\Image\Delete
+ */
 class DeleteTest extends TestCase
 {
     /**
@@ -39,44 +42,49 @@ class DeleteTest extends TestCase
     const ORIG_PATH = 'smetana/original/';
 
     /**
+     * @var Filesystem|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $filesystemMock;
+
+    /**
+     * @var File|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $fileDriverMock;
+
+    /**
      * @var Delete
      */
     private $deleteModel;
-
-    /**
-     * @var Filesystem
-     */
-    private $filesystem;
-
-    /**
-     * @var File
-     */
-    private $fileDriver;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->filesystem = $this->createMock(Filesystem::class);
-        $this->fileDriver = $this->createMock(File::class);
+        $this->filesystemMock = $this->createMock(Filesystem::class);
+        $this->fileDriverMock = $this->createMock(File::class);
 
         $this->deleteModel = (new ObjectManager($this))->getObject(
             Delete::class,
             [
-                'filesystem' => $this->filesystem,
-                'fileDriver' => $this->fileDriver,
+                'filesystem' => $this->filesystemMock,
+                'fileDriver' => $this->fileDriverMock,
             ]
         );
     }
 
-    public function testDeleteResizeImage()
+    /**
+     * Testing process of deleting resized image
+     *
+     * @return void
+     */
+    public function testDeleteResizeImage(): void
     {
         $size = 444;
         $absoluteResizeFilePath = self::MEDIA_PATH . self::RESIZE_PATH . $size . $size . '_' . self::FILE_NAME;
 
         $mediaDirectory = $this->createMock(ReadInterface::class);
-        $this->filesystem
+        $this->filesystemMock
             ->expects($this->once())
             ->method('getDirectoryRead')
             ->with('media')
@@ -88,19 +96,19 @@ class DeleteTest extends TestCase
             ->with(self::RESIZE_PATH)
             ->willReturn(self::MEDIA_PATH . self::RESIZE_PATH);
 
-        $this->fileDriver
+        $this->fileDriverMock
             ->expects($this->once())
             ->method('isExists')
             ->with(self::MEDIA_PATH . self::RESIZE_PATH)
             ->willReturn(true);
 
-        $this->fileDriver
+        $this->fileDriverMock
             ->expects($this->once())
             ->method('readDirectory')
             ->with(self::MEDIA_PATH . self::RESIZE_PATH)
             ->willReturn([$absoluteResizeFilePath]);
 
-        $this->fileDriver
+        $this->fileDriverMock
             ->expects($this->once())
             ->method('deleteFile')
             ->with($absoluteResizeFilePath)
@@ -110,12 +118,17 @@ class DeleteTest extends TestCase
         $this->assertEquals(null, $actual);
     }
 
-    public function testDeleteOrigImage()
+    /**
+     * Testing process of deleting original image
+     *
+     * @return void
+     */
+    public function testDeleteOrigImage(): void
     {
         $absoluteOrigFilePath = self::MEDIA_PATH . self::ORIG_PATH . self::FILE_NAME;
 
         $mediaDirectory = $this->createMock(ReadInterface::class);
-        $this->filesystem
+        $this->filesystemMock
             ->expects($this->once())
             ->method('getDirectoryRead')
             ->with('media')
@@ -127,19 +140,19 @@ class DeleteTest extends TestCase
             ->with(self::ORIG_PATH)
             ->willReturn(self::MEDIA_PATH . self::ORIG_PATH);
 
-        $this->fileDriver
+        $this->fileDriverMock
             ->expects($this->once())
             ->method('isExists')
             ->with(self::MEDIA_PATH . self::ORIG_PATH)
             ->willReturn(true);
 
-        $this->fileDriver
+        $this->fileDriverMock
             ->expects($this->once())
             ->method('readDirectory')
             ->with(self::MEDIA_PATH . self::ORIG_PATH)
             ->willReturn([$absoluteOrigFilePath]);
 
-        $this->fileDriver
+        $this->fileDriverMock
             ->expects($this->once())
             ->method('deleteFile')
             ->with($absoluteOrigFilePath)

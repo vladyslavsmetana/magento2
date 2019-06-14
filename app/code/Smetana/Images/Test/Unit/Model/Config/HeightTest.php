@@ -6,6 +6,9 @@ use PHPUnit\Framework\TestCase;
 use Smetana\Images\Model\Config\Height;
 use Smetana\Images\Model\Image\Delete;
 
+/**
+ * @covers \Smetana\Images\Model\Config\Height
+ */
 class HeightTest extends TestCase
 {
     /**
@@ -14,39 +17,52 @@ class HeightTest extends TestCase
     private $heightModel;
 
     /**
-     * @var Delete
+     * @var Delete|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $deleteImageModel;
+    private $deleteImageModelMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->deleteImageModel = $this->createMock(Delete::class);
+        $this->deleteImageModelMock = $this->createMock(Delete::class);
 
         $this->heightModel = (new ObjectManager($this))->getObject(
             Height::class,
             [
-                'deleteImageModel' => $this->deleteImageModel
+                'deleteImageModel' => $this->deleteImageModelMock
             ]
         );
     }
 
-    public function testFalseBeforeSave()
+    /**
+     * Testing process of saving image without changed height value
+     *
+     * @return void
+     */
+    public function testFalseBeforeSave(): void
     {
         $this->assertEquals(false, $this->heightModel->isValueChanged());
+        //засетити і замокати дані для getOldValue
         $actual = $this->heightModel->beforeSave();
         $this->assertEquals($this->heightModel, $actual);
     }
 
-    public function testTrueBeforeSave()
+    /**
+     * Testing process of saving image with changed height value
+     *
+     * @return void
+     */
+    public function testTrueBeforeSave(): void
     {
         $this->heightModel->setValue('value');
+        $this->heightModel->setOldValue('old');
+        //засетити і замокати дані для getOldValue
 
         $this->assertEquals(true, $this->heightModel->isValueChanged());
 
-        $this->deleteImageModel
+        $this->deleteImageModelMock
             ->expects($this->once())
             ->method('deleteImage')
             ->with('smetana/resize/')
@@ -55,4 +71,5 @@ class HeightTest extends TestCase
         $actual = $this->heightModel->beforeSave();
         $this->assertEquals($this->heightModel, $actual);
     }
+    //!!!!!!!!!!!!написати private function для скорочення коду
 }

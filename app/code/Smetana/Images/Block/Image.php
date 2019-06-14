@@ -61,8 +61,6 @@ class Image extends Template
     /**
      * Getting image path
      *
-     * @throws \Magento\Framework\Exception\FileSystemException
-     *
      * @return string
      */
     public function getImage(): string

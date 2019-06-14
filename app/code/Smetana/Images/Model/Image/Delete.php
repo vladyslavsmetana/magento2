@@ -40,7 +40,7 @@ class Delete
 
     /**
      * @param Filesystem $filesystem
-     * @param File|null $fileDriver
+     * @param File $fileDriver
      */
     public function __construct(
         Filesystem $filesystem,
@@ -62,11 +62,10 @@ class Delete
         $mediaDirectory = $this->filesystem->getDirectoryRead('media');
         $imagePath = $mediaDirectory->getAbsolutePath($path);
         if ($this->fileDriver->isExists($imagePath)) {
-            if ($files = $this->fileDriver->readDirectory($imagePath)) {
+            $files = $this->fileDriver->readDirectory($imagePath);
                 foreach ($files as $file) {
                     $this->fileDriver->deleteFile($file);
                 }
-            }
         }
     }
 }

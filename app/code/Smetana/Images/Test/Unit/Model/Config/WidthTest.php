@@ -6,6 +6,9 @@ use PHPUnit\Framework\TestCase;
 use Smetana\Images\Model\Config\Width;
 use Smetana\Images\Model\Image\Delete;
 
+/**
+ * @covers \Smetana\Images\Model\Config\Width
+ */
 class WidthTest extends TestCase
 {
     /**
@@ -14,39 +17,49 @@ class WidthTest extends TestCase
     private $widthModel;
 
     /**
-     * @var Delete
+     * @var Delete|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $deleteImageModel;
+    private $deleteImageModelMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->deleteImageModel = $this->createMock(Delete::class);
+        $this->deleteImageModelMock = $this->createMock(Delete::class);
 
         $this->widthModel = (new ObjectManager($this))->getObject(
             Width::class,
             [
-                'deleteImageModel' => $this->deleteImageModel
+                'deleteImageModel' => $this->deleteImageModelMock
             ]
         );
     }
 
-    public function testFalseBeforeSave()
+    /**
+     * Testing process of saving image without changed width value
+     *
+     * @return void
+     */
+    public function testFalseBeforeSave(): void
     {
         $this->assertEquals(false, $this->widthModel->isValueChanged());
         $actual = $this->widthModel->beforeSave();
         $this->assertEquals($this->widthModel, $actual);
     }
 
-    public function testTrueBeforeSave()
+    /**
+     * Testing process of saving image with changed width value
+     *
+     * @return void
+     */
+    public function testTrueBeforeSave(): void
     {
         $this->widthModel->setValue('value');
 
         $this->assertEquals(true, $this->widthModel->isValueChanged());
 
-        $this->deleteImageModel
+        $this->deleteImageModelMock
             ->expects($this->once())
             ->method('deleteImage')
             ->with('smetana/resize/')

@@ -7,7 +7,7 @@ use Magento\Framework\Image\AdapterFactory;
 use Smetana\Images\Model\Image\Delete;
 
 /**
- * ImageTest Resizing Operations
+ * Image Resizing Operations
  */
 class Resize
 {
@@ -56,7 +56,7 @@ class Resize
      *
      * @return string
      */
-    public function resize(string $image, int $width = null, int $height = null): string
+    public function resize(string $image, int $width, int $height): string
     {
         $mediaDirectory = $this->filesystem->getDirectoryRead('media');
         $origPath = $mediaDirectory->getAbsolutePath(Delete::ORIG_PATH . $image);

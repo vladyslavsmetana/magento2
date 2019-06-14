@@ -10,6 +10,9 @@ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\TestCase;
 use Smetana\Images\Model\Image\Resize;
 
+/**
+ * @covers \Smetana\Images\Model\Image\Resize
+ */
 class ResizeTest extends TestCase
 {
     /**
@@ -20,45 +23,50 @@ class ResizeTest extends TestCase
     const IMAGE_SIZE = 444;
 
     /**
+     * @var Filesystem|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $filesystemMock;
+
+    /**
+     * @var File|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $fileDriverMock;
+
+    /**
+     * @var AdapterFactory|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $imageFactoryMock;
+
+    /**
      * @var Resize
      */
     private $resizeModel;
-
-    /**
-     * @var Filesystem
-     */
-    private $filesystem;
-
-    /**
-     * @var File
-     */
-    private $fileDriver;
-
-    /**
-     * @var AdapterFactory
-     */
-    private $imageFactory;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->filesystem = $this->createMock(Filesystem::class);
-        $this->fileDriver = $this->createMock(File::class);
-        $this->imageFactory = $this->createMock(AdapterFactory::class);
+        $this->filesystemMock = $this->createMock(Filesystem::class);
+        $this->fileDriverMock = $this->createMock(File::class);
+        $this->imageFactoryMock = $this->createMock(AdapterFactory::class);
 
         $this->resizeModel = (new ObjectManager($this))->getObject(
             Resize::class,
             [
-                'filesystem' => $this->filesystem,
-                'imageFactory' => $this->imageFactory,
-                'fileDriver' => $this->fileDriver,
+                'filesystem' => $this->filesystemMock,
+                'imageFactory' => $this->imageFactoryMock,
+                'fileDriver' => $this->fileDriverMock,
             ]
         );
     }
 
-    public function testResize()
+    /**
+     * Testing image resizing process
+     *
+     * @return void
+     */
+    public function testResize(): void
     {
         $mediaPath = '/a/b/c/pub/media/';
         $fileName = 'filename.ext1';
@@ -68,7 +76,7 @@ class ResizeTest extends TestCase
         $absoluteResizeFilePath = $mediaPath . $resizePath . self::IMAGE_SIZE . self::IMAGE_SIZE . '_' . $fileName;
 
         $mediaDirectory = $this->createMock(ReadInterface::class);
-        $this->filesystem
+        $this->filesystemMock
             ->expects($this->once())
             ->method('getDirectoryRead')
             ->with('media')
@@ -86,7 +94,7 @@ class ResizeTest extends TestCase
                 $mediaPath
             );
 
-        $this->fileDriver
+        $this->fileDriverMock
             ->expects($this->any())
             ->method('isExists')
             ->withConsecutive(
@@ -100,7 +108,7 @@ class ResizeTest extends TestCase
 
         $imageResize = $this->createMock(AdapterInterface::class);
 
-        $this->imageFactory
+        $this->imageFactoryMock
             ->expects($this->once())
             ->method('create')
             ->willReturn($imageResize);
@@ -122,7 +130,6 @@ class ResizeTest extends TestCase
             ->method('getRelativePath')
             ->with($absoluteResizeFilePath)
             ->willReturn($origPath . $fileName);
-
 
         $actual = $this->resizeModel->resize($fileName, self::IMAGE_SIZE, self::IMAGE_SIZE);
         $this->assertEquals($origPath . $fileName, $actual);

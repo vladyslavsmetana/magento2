@@ -10,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 use Smetana\Images\Block\Image;
 use Smetana\Images\Model\Image\Resize;
 
+/**
+ * @covers \Smetana\Images\Block\Image
+ */
 class ImageTest extends TestCase
 {
     /**
@@ -55,84 +58,94 @@ class ImageTest extends TestCase
     const HEIGHT_OPTION = 'image_height';
 
     /**
+     * @var ScopeConfigInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $scopeConfigMock;
+
+    /**
+     * @var Resize|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $resizeMock;
+
+    /**
+     * @var UrlInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $urlBuilderMock;    //моки називати по-спеціальному і особливий коментар
+
+    /**
      * @var Image
      */
-    private $imageBlock;
-
-    /**
-     * @var ScopeConfigInterface
-     */
-    private $scopeConfig;
-
-    /**
-     * @var Resize
-     */
-    private $resize;
-
-    /**
-     * @var Context
-     */
-    private $urlBuilder;
+    private $imageBlock;    //об'єкт в кінець або початок
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->urlBuilder = $this->createMock(UrlInterface::class);
+        $this->urlBuilderMock = $this->createMock(UrlInterface::class);
         $context = $this->createMock(Context::class);
         $context->expects($this->once())
             ->method('getUrlBuilder')
-            ->willReturn($this->urlBuilder);
+            ->willReturn($this->urlBuilderMock);
 
-        $this->scopeConfig = $this->createMock(ScopeConfigInterface::class);
+        $this->scopeConfigMock = $this->createMock(ScopeConfigInterface::class);
 
-        $this->resize = $this->createMock(Resize::class);
-
+        $this->resizeMock = $this->createMock(Resize::class);
 
         $this->imageBlock = (new ObjectManager($this))->getObject(
             Image::class,
             [
-                'scopeConfig' => $this->scopeConfig,
-                'resize'      => $this->resize,
-                'context' => $context
+                'scopeConfig' => $this->scopeConfigMock,
+                'resize'      => $this->resizeMock,
+                'context'     => $context,
             ]
         );
     }
-
-    public function testGetImage()
+    //коментар для функції і класу
+    /**
+     * Testing process of getting image
+     *
+     * @return void
+     */
+    public function testGetImage(): void
     {
         $imagePath = 'smetana/resize/' . self::IMAGE_SIZE . self::IMAGE_SIZE . '_' . self::FILE_NAME;
         $imageUrl = 'http://mage.com/pub/media/';
 
-        $this->scopeConfig
-            ->expects($this->any())
-            ->method('getValue')
-            ->withConsecutive(
-                [self::CONFIG_PATH . self::NAME_OPTION],
-                [self::CONFIG_PATH . self::WIDTH_OPTION],
-                [self::CONFIG_PATH . self::HEIGHT_OPTION]
-            )
-            ->willReturnOnConsecutiveCalls(self::FILE_NAME, self::IMAGE_SIZE, self::IMAGE_SIZE);
-
-        $this->resize
-            ->expects($this->once())
-            ->method('resize')
-            ->willReturn($imagePath);
-
-        $this->urlBuilder
+        $this->urlBuilderMock
             ->expects($this->once())
             ->method('getBaseUrl')
             ->with(['_type' => 'media'])
             ->willReturn($imageUrl);
 
-        $actual = $this->imageBlock->getImage();
-        $this->assertEquals($imageUrl . $imagePath, $actual);
+        $this->configureVars($imagePath, $imageUrl . $imagePath);
     }
 
-    public function testGetAbsentImage()
+    /**
+     * Testing process of getting image when file missing
+     *
+     * @return void
+     */
+    public function testGetAbsentImage(): void
     {
-        $this->scopeConfig
+        $this->urlBuilderMock
+            ->expects($this->never())
+            ->method('getBaseUrl');
+
+        $this->configureVars('', '');
+    }
+
+    /**
+     * General interface
+     *
+     * @param string $imagePath
+     * @param string $expect
+     *
+     * @return void
+     */
+    private function configureVars($imagePath, $expect): void
+    {
+        $this->scopeConfigMock
             ->expects($this->any())
             ->method('getValue')
             ->withConsecutive(
@@ -142,12 +155,13 @@ class ImageTest extends TestCase
             )
             ->willReturnOnConsecutiveCalls(self::FILE_NAME, self::IMAGE_SIZE, self::IMAGE_SIZE);
 
-        $this->resize
+        $this->resizeMock
             ->expects($this->once())
             ->method('resize')
-            ->willReturn('');
+            ->willReturn($imagePath);
 
         $actual = $this->imageBlock->getImage();
-        $this->assertEquals('', $actual);
+
+        $this->assertEquals($expect, $actual);
     }
 }
