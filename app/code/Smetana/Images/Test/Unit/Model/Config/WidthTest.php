@@ -5,6 +5,7 @@ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\TestCase;
 use Smetana\Images\Model\Config\Width;
 use Smetana\Images\Model\Image\Delete;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 
 /**
  * @covers \Smetana\Images\Model\Config\Width
@@ -12,14 +13,33 @@ use Smetana\Images\Model\Image\Delete;
 class WidthTest extends TestCase
 {
     /**
-     * @var Width
+     * Path to image width Configuration
+     *
+     * @var String
      */
-    private $widthModel;
+    const CONFIG_WIDTH_PATH = 'smetana_section/smetana_group/image_width';
+
+    /**
+     * Image standard size
+     *
+     * @var Integer
+     */
+    const IMAGE_SIZE = 444;
 
     /**
      * @var Delete|\PHPUnit_Framework_MockObject_MockObject
      */
     private $deleteImageModelMock;
+
+    /**
+     * @var ScopeConfigInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $configMock;
+
+    /**
+     * @var Width
+     */
+    private $widthModel;
 
     /**
      * @inheritdoc
@@ -28,24 +48,29 @@ class WidthTest extends TestCase
     {
         $this->deleteImageModelMock = $this->createMock(Delete::class);
 
+        $this->configMock = $this->createMock(ScopeConfigInterface::class);
+
         $this->widthModel = (new ObjectManager($this))->getObject(
             Width::class,
             [
-                'deleteImageModel' => $this->deleteImageModelMock
+                'deleteImageModel' => $this->deleteImageModelMock,
+                'config'           => $this->configMock,
             ]
         );
     }
 
     /**
-     * Testing process of saving image without changed width value
+     * Testing process of saving image with no change width value
      *
      * @return void
      */
     public function testFalseBeforeSave(): void
     {
-        $this->assertEquals(false, $this->widthModel->isValueChanged());
-        $actual = $this->widthModel->beforeSave();
-        $this->assertEquals($this->widthModel, $actual);
+        $this->deleteImageModelMock
+            ->expects($this->never())
+            ->method('deleteImage');
+
+        $this->configureValueChange(self::IMAGE_SIZE, self::IMAGE_SIZE);
     }
 
     /**
@@ -55,17 +80,34 @@ class WidthTest extends TestCase
      */
     public function testTrueBeforeSave(): void
     {
-        $this->widthModel->setValue('value');
-
-        $this->assertEquals(true, $this->widthModel->isValueChanged());
-
         $this->deleteImageModelMock
             ->expects($this->once())
             ->method('deleteImage')
-            ->with('smetana/resize/')
-            ->willReturn(null);
+            ->with('smetana/resize/');
 
-        $actual = $this->widthModel->beforeSave();
-        $this->assertEquals($this->widthModel, $actual);
+        $this->configureValueChange(self::IMAGE_SIZE, 555);
+    }
+
+    /**
+     * Configure width value
+     *
+     * @param int $value
+     * @param int $oldValue
+     *
+     * @return void
+     */
+    private function configureValueChange(int $value, int $oldValue): void
+    {
+        $this->widthModel->setValue($value);
+        $this->widthModel->setPath(self::CONFIG_WIDTH_PATH);
+        $this->widthModel->setScope('default');
+        $this->widthModel->setScopeCode('');
+
+        $this->configMock
+            ->expects($this->once())
+            ->method('getValue')
+            ->willReturn($oldValue);
+
+        $this->widthModel->beforeSave();
     }
 }

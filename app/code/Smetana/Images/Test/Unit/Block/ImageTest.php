@@ -70,12 +70,12 @@ class ImageTest extends TestCase
     /**
      * @var UrlInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $urlBuilderMock;    //моки називати по-спеціальному і особливий коментар
+    private $urlBuilderMock;
 
     /**
      * @var Image
      */
-    private $imageBlock;    //об'єкт в кінець або початок
+    private $imageBlock;
 
     /**
      * @inheritdoc
@@ -101,7 +101,7 @@ class ImageTest extends TestCase
             ]
         );
     }
-    //коментар для функції і класу
+
     /**
      * Testing process of getting image
      *
@@ -143,7 +143,7 @@ class ImageTest extends TestCase
      *
      * @return void
      */
-    private function configureVars($imagePath, $expect): void
+    private function configureVars(string $imagePath, string $expect): void
     {
         $this->scopeConfigMock
             ->expects($this->any())

@@ -57,7 +57,7 @@ class Delete
      *
      * @return void
      */
-    public function deleteImage(string $path)
+    public function deleteImage(string $path): void
     {
         $mediaDirectory = $this->filesystem->getDirectoryRead('media');
         $imagePath = $mediaDirectory->getAbsolutePath($path);

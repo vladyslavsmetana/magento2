@@ -28,18 +28,11 @@ class DeleteTest extends TestCase
     const FILE_NAME = 'filename.ext1';
 
     /**
-     * Path to resize Folder
+     * Path to Image Folder
      *
      * @var String
      */
-    const RESIZE_PATH = 'smetana/resize/';
-
-    /**
-     * Path to original Folder
-     *
-     * @var String
-     */
-    const ORIG_PATH = 'smetana/original/';
+    const IMAGE_PATH = 'images';
 
     /**
      * @var Filesystem|\PHPUnit_Framework_MockObject_MockObject
@@ -74,91 +67,74 @@ class DeleteTest extends TestCase
     }
 
     /**
-     * Testing process of deleting resized image
+     * Testing process of deleting existing image
      *
      * @return void
      */
-    public function testDeleteResizeImage(): void
+    public function testDeleteExistingImage(): void
     {
-        $size = 444;
-        $absoluteResizeFilePath = self::MEDIA_PATH . self::RESIZE_PATH . $size . $size . '_' . self::FILE_NAME;
-
-        $mediaDirectory = $this->createMock(ReadInterface::class);
-        $this->filesystemMock
-            ->expects($this->once())
-            ->method('getDirectoryRead')
-            ->with('media')
-            ->willReturn($mediaDirectory);
-
-        $mediaDirectory
-            ->expects($this->once())
-            ->method('getAbsolutePath')
-            ->with(self::RESIZE_PATH)
-            ->willReturn(self::MEDIA_PATH . self::RESIZE_PATH);
-
-        $this->fileDriverMock
-            ->expects($this->once())
-            ->method('isExists')
-            ->with(self::MEDIA_PATH . self::RESIZE_PATH)
-            ->willReturn(true);
+        $absoluteFilePath = self::MEDIA_PATH . 'images' . self::FILE_NAME;
 
         $this->fileDriverMock
             ->expects($this->once())
             ->method('readDirectory')
-            ->with(self::MEDIA_PATH . self::RESIZE_PATH)
-            ->willReturn([$absoluteResizeFilePath]);
+            ->with(self::MEDIA_PATH . self::IMAGE_PATH)
+            ->willReturn([$absoluteFilePath]);
 
         $this->fileDriverMock
             ->expects($this->once())
             ->method('deleteFile')
-            ->with($absoluteResizeFilePath)
+            ->with($absoluteFilePath)
             ->willReturn(true);
 
-        $actual = $this->deleteModel->deleteImage(self::RESIZE_PATH);
-        $this->assertEquals(null, $actual);
+        $this->setImageExistence(true);
     }
 
     /**
-     * Testing process of deleting original image
+     * Testing process of deleting non existent image
      *
      * @return void
      */
-    public function testDeleteOrigImage(): void
+    public function testDeleteNonexistentImage(): void
     {
-        $absoluteOrigFilePath = self::MEDIA_PATH . self::ORIG_PATH . self::FILE_NAME;
+        $this->fileDriverMock
+            ->expects($this->never())
+            ->method('readDirectory');
 
+        $this->fileDriverMock
+            ->expects($this->never())
+            ->method('deleteFile');
+
+        $this->setImageExistence(false);
+    }
+
+    /**
+     * Configure existence of Image
+     *
+     * @param bool $isExists
+     *
+     * @return void
+     */
+    private function setImageExistence(string $isExists): void
+    {
         $mediaDirectory = $this->createMock(ReadInterface::class);
         $this->filesystemMock
             ->expects($this->once())
             ->method('getDirectoryRead')
-            ->with('media')
             ->willReturn($mediaDirectory);
 
         $mediaDirectory
             ->expects($this->once())
             ->method('getAbsolutePath')
-            ->with(self::ORIG_PATH)
-            ->willReturn(self::MEDIA_PATH . self::ORIG_PATH);
+            ->with(self::IMAGE_PATH)
+            ->willReturn(self::MEDIA_PATH . self::IMAGE_PATH);
 
         $this->fileDriverMock
             ->expects($this->once())
             ->method('isExists')
-            ->with(self::MEDIA_PATH . self::ORIG_PATH)
-            ->willReturn(true);
+            ->with(self::MEDIA_PATH . self::IMAGE_PATH)
+            ->willReturn($isExists);
 
-        $this->fileDriverMock
-            ->expects($this->once())
-            ->method('readDirectory')
-            ->with(self::MEDIA_PATH . self::ORIG_PATH)
-            ->willReturn([$absoluteOrigFilePath]);
-
-        $this->fileDriverMock
-            ->expects($this->once())
-            ->method('deleteFile')
-            ->with($absoluteOrigFilePath)
-            ->willReturn(true);
-
-        $actual = $this->deleteModel->deleteImage(self::ORIG_PATH);
-        $this->assertEquals(null, $actual);
+        $this->deleteModel->deleteImage(self::IMAGE_PATH);
     }
 }

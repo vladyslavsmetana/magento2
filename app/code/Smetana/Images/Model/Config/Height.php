@@ -58,6 +58,8 @@ class Height extends Value
 
     /**
      * ImageTest height change check
+     *
+     * @return \Magento\Framework\App\Config\Value
      */
     public function beforeSave()
     {

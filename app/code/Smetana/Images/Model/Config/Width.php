@@ -58,6 +58,8 @@ class Width extends Value
 
     /**
      * ImageTest width change check
+     *
+     * @return \Magento\Framework\App\Config\Value
      */
     public function beforeSave()
     {

@@ -13,11 +13,11 @@ use Smetana\Images\Model\Image\Delete;
 class ImageTest extends TestCase
 {
     /**
-     * Image name Configuration
+     * Name of Image
      *
      * @var String
      */
-    const IMAGE_NAME_CONF = 'smetana_section/smetana_group/smetana_upload_image';
+    const FILE_NAME = 'filename.ext1';
 
     /**
      * @var RequestDataInterface|\PHPUnit_Framework_MockObject_MockObject
@@ -53,38 +53,63 @@ class ImageTest extends TestCase
     }
 
     /**
-     * Testing process of saving image
+     * Testing process of saving with image
      *
      * @return void
      */
-    public function testBeforeSave(): void
+    public function testBeforeSaveWithFile(): void
     {
-        $fileName = 'filename.ext1';
+        $this->requestDataMock
+            ->expects($this->once())
+            ->method('getName')
+            ->willReturn(self::FILE_NAME);
 
-        $this->imageModel->setValue(['value ' => $fileName]);
-        $this->imageModel->setPath(self::IMAGE_NAME_CONF);
+        $this->deleteImageMock
+            ->expects($this->any())
+            ->method('deleteImage');
+
+        $this->configureFileData([false, '/tmp/phpgHrwD1'], 'section/group/image');
+    }
+
+    /**
+     * Testing process of saving without image
+     *
+     * @return void
+     */
+    public function testBeforeSaveWithoutFile(): void
+    {
+        $this->requestDataMock
+            ->expects($this->never())
+            ->method('getName');
+
+        $this->deleteImageMock
+            ->expects($this->never())
+            ->method('deleteImage');
+
+        $this->configureFileData([false, false], '');
+    }
+
+    /**
+     * Configure file data
+     *
+     * @param array $fileParameters
+     * @param string $path
+     *
+     * @return void
+     */
+    private function configureFileData(array $fileParameters, string $path): void
+    {
+        $this->imageModel->setValue(['value ' => self::FILE_NAME]);
+        $this->imageModel->setPath($path);
 
         $this->requestDataMock
             ->expects($this->any())
             ->method('getTmpName')
-            ->withConsecutive(
-                [self::IMAGE_NAME_CONF],
-                [self::IMAGE_NAME_CONF]
-            )
             ->willReturnOnConsecutiveCalls(
-                false,
-                '/tmp/phpgHrwD1'
+                $fileParameters[0],
+                $fileParameters[1]
             );
 
-        $this->deleteImageMock
-            ->expects($this->any())
-            ->method('deleteImage')
-            ->willReturnOnConsecutiveCalls(
-                null,
-                null
-            );
-
-        $actual = $this->imageModel->beforeSave();
-        $this->assertEquals($this->imageModel, $actual);
+        $this->imageModel->beforeSave();
     }
 }

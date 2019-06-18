@@ -16,6 +16,34 @@ use Smetana\Images\Model\Image\Resize;
 class ResizeTest extends TestCase
 {
     /**
+     * Path to Media directory
+     *
+     * @var String
+     */
+    const MEDIA_PATH = '/a/b/c/pub/media/';
+
+    /**
+     * Name of Image
+     *
+     * @var String
+     */
+    const FILE_NAME = 'filename.ext1';
+
+    /**
+     * Path to Original folder
+     *
+     * @var String
+     */
+    const ORIG_PATH = 'smetana/original/';
+
+    /**
+     * Path to Resize folder
+     *
+     * @var String
+     */
+    const RESIZE_PATH = 'smetana/resize/';
+
+    /**
      * Size of Image
      *
      * @var Integer
@@ -66,14 +94,72 @@ class ResizeTest extends TestCase
      *
      * @return void
      */
-    public function testResize(): void
+    public function testNonexistentResize(): void
     {
-        $mediaPath = '/a/b/c/pub/media/';
-        $fileName = 'filename.ext1';
-        $origPath = 'smetana/original/';
-        $resizePath = 'smetana/resize/';
-        $absoluteOrigFilePath = $mediaPath . $origPath . $fileName;
-        $absoluteResizeFilePath = $mediaPath . $resizePath . self::IMAGE_SIZE . self::IMAGE_SIZE . '_' . $fileName;
+        $imageResize = $this->createMock(AdapterInterface::class);
+
+        $this->imageFactoryMock
+            ->expects($this->once())
+            ->method('create')
+            ->willReturn($imageResize);
+
+        $imageResize
+            ->expects($this->once())
+            ->method('open')
+            ->with(self::MEDIA_PATH . self::ORIG_PATH . self::FILE_NAME);
+
+        $imageResize
+            ->expects($this->once())
+            ->method('resize')
+            ->with(self::IMAGE_SIZE, self::IMAGE_SIZE);
+
+        $imageResize
+            ->expects($this->once())
+            ->method('save')
+            ->with(self::MEDIA_PATH . self::RESIZE_PATH . self::IMAGE_SIZE . self::IMAGE_SIZE . '_' . self::FILE_NAME);
+
+        $this->setImageExistence(false);
+    }
+
+    /**
+     * Test to avoid resizing process
+     *
+     * @return void
+     */
+    public function testExistingResize(): void
+    {
+        $imageResize = $this->createMock(AdapterInterface::class);
+
+        $this->imageFactoryMock
+            ->expects($this->never())
+            ->method('create');
+
+        $imageResize
+            ->expects($this->never())
+            ->method('open');
+
+        $imageResize
+            ->expects($this->never())
+            ->method('resize');
+
+        $imageResize
+            ->expects($this->never())
+            ->method('save');
+
+        $this->setImageExistence(true);
+    }
+
+    /**
+     * Configure existence of Image
+     *
+     * @param bool $isExists
+     *
+     * @return void
+     */
+    private function setImageExistence(bool $isExists): void
+    {
+        $absoluteOrigFilePath = self::MEDIA_PATH . self::ORIG_PATH . self::FILE_NAME;
+        $absoluteResizeFilePath = self::MEDIA_PATH . self::RESIZE_PATH . self::IMAGE_SIZE . self::IMAGE_SIZE . '_' . self::FILE_NAME;
 
         $mediaDirectory = $this->createMock(ReadInterface::class);
         $this->filesystemMock
@@ -86,12 +172,12 @@ class ResizeTest extends TestCase
             ->expects($this->any())
             ->method('getAbsolutePath')
             ->withConsecutive(
-                [$origPath . $fileName],
+                [self::ORIG_PATH . self::FILE_NAME],
                 ['']
             )
             ->willReturnOnConsecutiveCalls(
                 $absoluteOrigFilePath,
-                $mediaPath
+                self::MEDIA_PATH
             );
 
         $this->fileDriverMock
@@ -103,35 +189,16 @@ class ResizeTest extends TestCase
             )
             ->willReturnOnConsecutiveCalls(
                 true,
-                false
+                $isExists
             );
-
-        $imageResize = $this->createMock(AdapterInterface::class);
-
-        $this->imageFactoryMock
-            ->expects($this->once())
-            ->method('create')
-            ->willReturn($imageResize);
-
-        $imageResize
-            ->expects($this->once())
-            ->method('resize')
-            ->with(self::IMAGE_SIZE, self::IMAGE_SIZE)
-            ->willReturn(true);
-
-        $imageResize
-            ->expects($this->once())
-            ->method('save')
-            ->with($absoluteResizeFilePath)
-            ->willReturn(true);
 
         $mediaDirectory
             ->expects($this->once())
             ->method('getRelativePath')
             ->with($absoluteResizeFilePath)
-            ->willReturn($origPath . $fileName);
+            ->willReturn(self::ORIG_PATH . self::FILE_NAME);
 
-        $actual = $this->resizeModel->resize($fileName, self::IMAGE_SIZE, self::IMAGE_SIZE);
-        $this->assertEquals($origPath . $fileName, $actual);
+        $actual = $this->resizeModel->resize(self::FILE_NAME, self::IMAGE_SIZE, self::IMAGE_SIZE);
+        $this->assertEquals(self::ORIG_PATH . self::FILE_NAME, $actual);
     }
 }
