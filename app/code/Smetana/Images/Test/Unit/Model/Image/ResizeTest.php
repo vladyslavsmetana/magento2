@@ -90,7 +90,7 @@ class ResizeTest extends TestCase
     }
 
     /**
-     * Testing image resizing process
+     * Resize image process test
      *
      * @return void
      */

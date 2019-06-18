@@ -60,7 +60,7 @@ class WidthTest extends TestCase
     }
 
     /**
-     * Testing process of saving image with no change width value
+     * Save image process test with no change width value
      *
      * @return void
      */
@@ -74,7 +74,7 @@ class WidthTest extends TestCase
     }
 
     /**
-     * Testing process of saving image with changed width value
+     * Save image process test with changed width value
      *
      * @return void
      */

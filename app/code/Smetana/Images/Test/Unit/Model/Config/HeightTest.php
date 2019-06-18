@@ -60,7 +60,7 @@ class HeightTest extends TestCase
     }
 
     /**
-     * Testing process of saving image with no change height value
+     * Save image process test with no change height value
      *
      * @return void
      */
@@ -74,7 +74,7 @@ class HeightTest extends TestCase
     }
 
     /**
-     * Testing process of saving image with changed height value
+     * Save image process test with changed height value
      *
      * @return void
      */

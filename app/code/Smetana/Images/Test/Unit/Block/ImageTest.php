@@ -103,7 +103,7 @@ class ImageTest extends TestCase
     }
 
     /**
-     * Testing process of getting image
+     * Get image process test
      *
      * @return void
      */
@@ -122,7 +122,7 @@ class ImageTest extends TestCase
     }
 
     /**
-     * Testing process of getting image when file missing
+     * Get image process test when file missing
      *
      * @return void
      */
@@ -136,7 +136,7 @@ class ImageTest extends TestCase
     }
 
     /**
-     * General interface
+     * Configure image path
      *
      * @param string $imagePath
      * @param string $expect

@@ -12,7 +12,7 @@ use Magento\Framework\Registry;
 use Smetana\Images\Model\Image\Delete;
 
 /**
- * Checking Height of ImageTest
+ * Process of check height value and delete resize image
  */
 class Height extends Value
 {
@@ -57,7 +57,7 @@ class Height extends Value
     }
 
     /**
-     * ImageTest height change check
+     * Process of check height value and delete resize image
      *
      * @return \Magento\Framework\App\Config\Value
      */

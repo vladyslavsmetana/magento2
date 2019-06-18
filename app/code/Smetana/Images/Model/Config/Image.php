@@ -16,7 +16,7 @@ use Magento\MediaStorage\Model\File\UploaderFactory;
 use Smetana\Images\Model\Image\Delete;
 
 /**
- * ImageTest Saving Operations
+ * Image Saving Operations
  */
 class Image extends Images
 {
@@ -113,7 +113,7 @@ class Image extends Images
     }
 
     /**
-     * Changing process of saving image
+     * Operations before saving image
      */
     public function beforeSave()
     {

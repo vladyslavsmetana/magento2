@@ -53,7 +53,7 @@ class ImageTest extends TestCase
     }
 
     /**
-     * Testing process of saving with image
+     * Save process test with image
      *
      * @return void
      */
@@ -72,7 +72,7 @@ class ImageTest extends TestCase
     }
 
     /**
-     * Testing process of saving without image
+     * Save process test without image
      *
      * @return void
      */

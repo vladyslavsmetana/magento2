@@ -67,7 +67,7 @@ class DeleteTest extends TestCase
     }
 
     /**
-     * Testing process of deleting existing image
+     * Delete existing image process test
      *
      * @return void
      */
@@ -91,7 +91,7 @@ class DeleteTest extends TestCase
     }
 
     /**
-     * Testing process of deleting non existent image
+     * Delete non existent image process test
      *
      * @return void
      */
@@ -111,7 +111,7 @@ class DeleteTest extends TestCase
     /**
      * Configure existence of Image
      *
-     * @param bool $isExists
+     * @param string $isExists
      *
      * @return void
      */

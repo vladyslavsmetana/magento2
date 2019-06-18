@@ -21,7 +21,7 @@ class Image extends Template
     private $scopeConfig;
 
     /**
-     * ImageTest Resize Model
+     * Image Resize Model
      *
      * @var Resize
      */
@@ -43,7 +43,7 @@ class Image extends Template
     }
 
     /**
-     * Getting config value
+     * Return config value
      *
      * @param string $option
      *
@@ -59,7 +59,7 @@ class Image extends Template
     }
 
     /**
-     * Getting image path
+     * Return image path
      *
      * @return string
      */
