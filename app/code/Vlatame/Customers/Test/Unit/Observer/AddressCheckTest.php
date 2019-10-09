@@ -105,27 +105,17 @@ class AddressCheckTest extends TestCase
     }
 
     /**
-     * Test if customer address is restricted
+     * Test if customer address is not allowed
      *
      * @param void
      *
      * @return void
      */
-    public function testExecute(): void
+    public function testWithAddressExecute(): void
     {
         $countryCode = 'US';
         $url = 'http://mage2.com/';
         $request = 'customer/address/edit/id/0';
-
-        $this->customerSessionMock
-            ->expects($this->once())
-            ->method('getCustomer')
-            ->willReturn($this->customerMock);
-
-        $this->customerMock
-            ->expects($this->once())
-            ->method('getData')
-            ->willReturn([AttributeNames::RESTRICTION_ENABLE => 1, AttributeNames::COUNTRIES_RESTRICTION => 'AF,US']);
 
         $this->customerMock
             ->expects($this->once())
@@ -180,6 +170,69 @@ class AddressCheckTest extends TestCase
             ->method('setRedirect')
             ->with($url . $request)
             ->willReturnSelf();
+
+        $this->generalTestScenario();
+    }
+
+    /**
+     * Test if customer without address
+     *
+     * @param void
+     *
+     * @return void
+     */
+    public function testMissingAddressExecute(): void
+    {
+        $this->customerMock
+            ->expects($this->once())
+            ->method('getAddresses')
+            ->willReturn([]);
+
+        $this->customerAddressMock
+            ->expects($this->never())
+            ->method('getData');
+
+        $this->countryFactoryMock
+            ->expects($this->never())
+            ->method('create');
+
+        $this->countryMock
+            ->expects($this->never())
+            ->method('getName');
+
+        $this->messageManagerMock
+            ->expects($this->never())
+            ->method('addErrorMessage');
+
+        $this->urlMock
+            ->expects($this->never())
+            ->method('getUrl');
+
+        $this->observerMock
+            ->expects($this->never())
+            ->method('getData');
+
+        $this->generalTestScenario();
+    }
+
+    /**
+     * General test functionality
+     *
+     * @param void
+     *
+     * @return void
+     */
+    private function generalTestScenario(): void
+    {
+        $this->customerSessionMock
+            ->expects($this->once())
+            ->method('getCustomer')
+            ->willReturn($this->customerMock);
+
+        $this->customerMock
+            ->expects($this->once())
+            ->method('getData')
+            ->willReturn([AttributeNames::RESTRICTION_ENABLE => 1, AttributeNames::COUNTRIES_RESTRICTION => 'AF,AX']);
 
         $this->addressCheckObserver->execute($this->observerMock);
     }

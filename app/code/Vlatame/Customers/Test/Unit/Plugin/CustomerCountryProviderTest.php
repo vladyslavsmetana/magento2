@@ -16,16 +16,6 @@ use Magento\Directory\Model\ResourceModel\Country\Collection;
 class CustomerCountryProviderTest extends TestCase
 {
     /**
-     * Expected test result
-     *
-     * @var array
-     */
-    private $expected = [
-        'value' => 'AL',
-        'label' => 'Albania',
-    ];
-
-    /**
      * @var Session|MockObject
      */
     private $customerSessionMock;
@@ -72,17 +62,7 @@ class CustomerCountryProviderTest extends TestCase
      */
     public function testAfterToOptionArray(): void
     {
-        $options = [
-            [
-                'value' => 'AF',
-                'label' => 'Afghanistan',
-            ],
-            $this->expected,
-            [
-                'value' => 'US',
-                'label' => 'United States',
-            ],
-        ];
+        $allowedCountries = 'AF,US';
 
         $this->customerSessionMock
             ->expects($this->once())
@@ -92,9 +72,18 @@ class CustomerCountryProviderTest extends TestCase
         $this->customerModelMock
             ->expects($this->once())
             ->method('getData')
-            ->willReturn([AttributeNames::RESTRICTION_ENABLE => 1, AttributeNames::COUNTRIES_RESTRICTION => 'AF,US']);
+            ->willReturn([
+                AttributeNames::RESTRICTION_ENABLE => 1,
+                AttributeNames::COUNTRIES_RESTRICTION => $allowedCountries
+            ]);
 
-        $actual = $this->countryPlugin->afterToOptionArray($this->pluginObjectMock, $options);
-        $this->assertEquals(['1' => $this->expected], $actual);
+        $this->pluginObjectMock
+            ->expects($this->once())
+            ->method('addFieldToFilter')
+            ->with("country_id", ['in' => $allowedCountries])
+            ->willReturnSelf();
+
+        $actual = $this->countryPlugin->afterLoadByStore($this->pluginObjectMock);
+        $this->assertEquals($this->pluginObjectMock, $actual);
     }
 }

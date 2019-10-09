@@ -30,27 +30,23 @@ class CustomerCountryProvider
      * Change Country data
      *
      * @param Collection $pluginObject
-     * @param array $options
      *
-     * @return array
+     * @return Collection
      */
-    public function afterToOptionArray(Collection $pluginObject, array $options): array
+    public function afterLoadByStore(Collection $pluginObject): Collection
     {
         $customerData = $this->customerSession->getCustomer()->getData();
         if (
             !empty($customerData)
+            && isset($customerData[AttributeNames::RESTRICTION_ENABLE])
             && $customerData[AttributeNames::RESTRICTION_ENABLE]
-            && isset($customerData[AttributeNames::COUNTRIES_RESTRICTION])
         ) {
-            $restrictCountries = explode(',', $customerData[AttributeNames::COUNTRIES_RESTRICTION]);
-            $countryList = array_column($options, 'value');
-            foreach ($restrictCountries as $country) {
-                if (in_array($country, $countryList)) {
-                    unset($options[array_search($country, $countryList)]);
-                }
-            }
+            $allowedCountries = isset($customerData[AttributeNames::COUNTRIES_RESTRICTION])
+                ? $customerData[AttributeNames::COUNTRIES_RESTRICTION]
+                : [];
+            $pluginObject->addFieldToFilter("country_id", ['in' => $allowedCountries]);
         }
 
-        return $options;
+        return $pluginObject;
     }
 }

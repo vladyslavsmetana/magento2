@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <fieldset name="customer">
+        <field name="customer_delivery_restriction_enable" component="Magento_Ui/js/form/element/single-checkbox" sortOrder="5" formElement="checkbox">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">customer</item>
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <additionalClasses>
+                    <class name="admin__field-x-small">true</class>
+                </additionalClasses>
+                <dataType>boolean</dataType>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="string">0</map>
+                            <map name="true" xsi:type="string">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+        <field name="customer_delivery_restriction_countries" sortOrder="10">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">customer</item>
+                </item>
+            </argument>
+            <settings>
+                <imports>
+                    <link name="disabled">!${ $.parentName }.customer_delivery_restriction_enable:checked</link>
+                </imports>
+            </settings>
+        </field>
+    </fieldset>
+</form>

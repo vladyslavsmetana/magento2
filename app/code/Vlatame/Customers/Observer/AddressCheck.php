@@ -44,6 +44,13 @@ class AddressCheck implements \Magento\Framework\Event\ObserverInterface
     private $countryFactory;
 
     /**
+     * Frontend Observer instance
+     *
+     * @var Observer
+     */
+    private $observer;
+
+    /**
      * @param ManagerInterface $messageManager
      * @param Session $customerSession
      * @param UrlInterface $url
@@ -70,6 +77,7 @@ class AddressCheck implements \Magento\Framework\Event\ObserverInterface
      */
     public function execute(Observer $observer)
     {
+        $this->observer = $observer;
         $customerCountries = [];
         $customer = $this->customerSession->getCustomer();
         $customerData = $customer->getData();
@@ -77,30 +85,53 @@ class AddressCheck implements \Magento\Framework\Event\ObserverInterface
 
         if (
             !empty($customerData)
-            && !empty($addresses)
             && isset($customerData[AttributeNames::RESTRICTION_ENABLE])
             && $customerData[AttributeNames::RESTRICTION_ENABLE]
         ) {
-            foreach ($addresses as $key => $address) {
-                $customerCountries[$key] = $address->getData('country_id');
+            if (!isset($customerData[AttributeNames::COUNTRIES_RESTRICTION])) {
+                $this->errorRedirect(
+                    __('Delivery is not allowed for customer with such email %1', $customerData['email']),
+                    'home'
+                );
+
+                return $this;
             }
 
-            $restrictCountries = $customerData[AttributeNames::COUNTRIES_RESTRICTION];
-            $restrictCountries = explode(',', $restrictCountries);
-            foreach ($customerCountries as $key => $country) {
-                if (in_array($country, $restrictCountries)) {
-                    $countryModel = $this->countryFactory->create()->loadByCode($country);
-                    $this->messageManager->addErrorMessage(
-                        __('%1 is not allowed for delivery, please change the country', $countryModel->getName())
-                    );
+            if (!empty($addresses)) {
+                foreach ($addresses as $key => $address) {
+                    $customerCountries[$key] = $address->getData('country_id');
+                }
 
-                    $redirectionUrl = $this->url->getUrl(sprintf('customer/address/edit/id/%1u', $key));
-                    $observer->getData('controller_action')->getResponse()->setRedirect($redirectionUrl);
-                    break;
+                $allowedCountries = $customerData[AttributeNames::COUNTRIES_RESTRICTION];
+                $allowedCountries = explode(',', $allowedCountries);
+                foreach ($customerCountries as $key => $country) {
+                    if (!in_array($country, $allowedCountries)) {
+                        $countryModel = $this->countryFactory->create()->loadByCode($country);
+                        $this->errorRedirect(
+                            __('%1 is not allowed for delivery, please change the country', $countryModel->getName()),
+                            sprintf('customer/address/edit/id/%1u', $key)
+                        );
+                        break;
+                    }
                 }
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Add error message and set redirection from params
+     *
+     * @param string $message
+     * @param string $request
+     *
+     * @return void
+     */
+    private function errorRedirect(string $message, string $request): void
+    {
+        $this->messageManager->addErrorMessage($message);
+        $redirectionUrl = $this->url->getUrl($request);
+        $this->observer->getData('controller_action')->getResponse()->setRedirect($redirectionUrl);
     }
 }
