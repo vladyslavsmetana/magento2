@@ -54,13 +54,13 @@ class CustomerCountryProviderTest extends TestCase
     }
 
     /**
-     * Change Country data test
+     * Change Country options test
      *
      * @param void
      *
      * @return void
      */
-    public function testAfterToOptionArray(): void
+    public function testAfterLoadByStore(): void
     {
         $allowedCountries = 'AF,US';
 

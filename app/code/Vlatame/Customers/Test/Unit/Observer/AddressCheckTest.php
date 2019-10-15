@@ -171,7 +171,7 @@ class AddressCheckTest extends TestCase
             ->with($url . $request)
             ->willReturnSelf();
 
-        $this->generalTestScenario();
+        $this->testExecute();
     }
 
     /**
@@ -212,7 +212,7 @@ class AddressCheckTest extends TestCase
             ->expects($this->never())
             ->method('getData');
 
-        $this->generalTestScenario();
+        $this->testExecute();
     }
 
     /**
@@ -222,7 +222,7 @@ class AddressCheckTest extends TestCase
      *
      * @return void
      */
-    private function generalTestScenario(): void
+    private function testExecute(): void
     {
         $this->customerSessionMock
             ->expects($this->once())

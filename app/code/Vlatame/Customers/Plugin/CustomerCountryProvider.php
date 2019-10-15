@@ -22,7 +22,8 @@ class CustomerCountryProvider
      */
     public function __construct(
         Session $customerSession
-    ) {
+    )
+    {
         $this->customerSession = $customerSession;
     }
 
@@ -46,7 +47,6 @@ class CustomerCountryProvider
                 : [];
             $pluginObject->addFieldToFilter("country_id", ['in' => $allowedCountries]);
         }
-
         return $pluginObject;
     }
 }
