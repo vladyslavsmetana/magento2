@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="skip_page_reload_event">
+        <observer name="page_reload_after_wait_order" instance="Smetana\Project\Observer\SkipPageReload" />
+    </event>
+    <event name="controller_action_predispatch_sales_order_view">
+        <observer name="check_before_view_order" instance="Smetana\Project\Observer\AddViewInitiator" />
+    </event>
+</config>

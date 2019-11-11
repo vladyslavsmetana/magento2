@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <settings>
+        <buttons>
+            <button name="get_order" class="Smetana\Project\Block\Adminhtml\Order\GridButton"/>
+        </buttons>
+    </settings>
+    <listingToolbar name="listing_top">
+        <massaction name="listing_massaction" class="Smetana\Project\Ui\MassAction"/>
+    </listingToolbar>
+    <columns name="sales_order_columns">
+        <column name="order_primary_initiator" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <filter>select</filter>
+                <options class="Smetana\Project\Ui\Component\Listing\Column\Initiator"/>
+                <dataType>select</dataType>
+                <label translate="true">Primary Initiator</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+        <column name="order_initiator" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <filter>select</filter>
+                <options class="Smetana\Project\Ui\Component\Listing\Column\Initiator"/>
+                <dataType>select</dataType>
+                <label translate="true">Initiator</label>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Smetana\Project\Ui\Component\Listing\Column\Actions">
+            <settings>
+                <indexField>entity_id</indexField>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

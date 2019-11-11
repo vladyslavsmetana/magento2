@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+    <preference for="Magento\User\Block\User\Edit\Tab\Main" type="Smetana\Project\Block\Adminhtml\User\Edit"/>
+    <preference for="Magento\Sales\Block\Adminhtml\Order\View" type="Smetana\Project\Block\Adminhtml\Order\ViewButton"/>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="sales_order_grid_data_source" xsi:type="string">Smetana\Project\Model\Order\GridCollection</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <plugin name="change_email_filter" type="Smetana\Project\Plugin\SetEmailFilter" sortOrder="40" />
+    </type>
+</config>

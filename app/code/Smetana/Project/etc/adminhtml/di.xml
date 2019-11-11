@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="order_initiator" xsi:type="string">sales_order.order_initiator</item>
+                <item name="order_primary_initiator" xsi:type="string">sales_order.order_primary_initiator</item>
+            </argument>
+        </arguments>
+    </virtualType>
+</config>
